@@ -5,7 +5,11 @@ import { HOME_REMEDIES, RELIEF_VIDEOS, MANDALAS, RED_WAIT_TIPS } from "../lib/ca
 import { Leaf, PlayCircle, Flower2, PhoneCall, MessageCircle, Siren, HeartPulse, Wind } from "lucide-react";
 
 function buildWaLink(user, s) {
-  const digits = (user?.emergency_contact_phone || "").replace(/[^0-9]/g, "");
+  let digits = (user?.emergency_contact_phone || "").replace(/[^0-9]/g, "");
+  // Normalise to a dialable international number (default India +91 when no country code given).
+  if (digits.startsWith("0")) digits = digits.replace(/^0+/, "");
+  if (digits.length === 10) digits = "91" + digits;
+  const valid = digits.length >= 11;
   const name = user?.name || "Someone I know";
   const regions = (s.regions || []).join(", ") || "unspecified area";
   const symptoms = (s.rel || []).filter((x) => !x.startsWith("None")).join(", ");
@@ -14,7 +18,7 @@ function buildWaLink(user, s) {
     `A serious (RED) situation was flagged — pain in ${regions}, severity ${s.sev}/10` +
     (symptoms ? `, symptoms: ${symptoms}` : "") +
     `. Please reach them or call emergency services immediately. (Automated alert — not a medical diagnosis.)`;
-  return { digits, url: `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` };
+  return { digits: valid ? digits : "", url: `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` };
 }
 
 function dedupe(videos) {

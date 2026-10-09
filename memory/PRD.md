@@ -34,6 +34,10 @@ and an enhanced display/theme.
 
 ## Implemented (2026-10-09)
 - Full auth (email/password + Emergent Google), admin seeded (vaibhavtaneja6453@gmail.com).
+- Smart login (unregistered email -> register handoff with prefill); editable Profile page with avatar/DP upload.
+- Named genuine testimonials (Aishwarya Taneja, Rajvir Saini, S. P. Yadav, Tenzin Rawat) with photos; nav avatar dropdown.
+- Care & Relief on Yellow/Red results: home remedies by region, relief/relaxation YouTube videos, mandala "breathe" animation.
+- Red emergency section: Call 112 + one-tap WhatsApp alert (wa.me) to emergency contact (India code normalised); add-contact fallback.
 - Diagnostics wizard with interactive front/back SVG body map, voice input, rule-based Green/Yellow/Red
   triage + doctor summary (ported from prototype), save-to-diary.
 - Dashboard with diary + recharts statistics.
