@@ -192,5 +192,14 @@ body {
 
 ::selection { background: var(--pm-sel); color: var(--pm-ink); }
 
+@keyframes breathe {
+  0%, 100% { transform: scale(0.82); }
+  45%, 55% { transform: scale(1.06); }
+}
+.mandala-breathe {
+  animation: breathe 11s ease-in-out infinite;
+  will-change: transform;
+}
+
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: var(--pm-border); border-radius: 8px; }

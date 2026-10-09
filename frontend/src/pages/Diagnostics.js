@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { api } from "../lib/api";
 import BodyMap from "../components/BodyMap";
+import CareRelief from "../components/CareRelief";
+import { useAuth } from "../context/AuthContext";
 import {
   DESC, ONSET, DUR, PAT, TRIG, REL, AQ, groups, axAll, analyse, summary, LEVEL_FULL,
 } from "../lib/painEngine";
@@ -18,6 +20,7 @@ const emptyState = {
 
 export default function Diagnostics() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [s, setS] = useState({ ...emptyState });
   const [saving, setSaving] = useState(false);
@@ -202,6 +205,7 @@ export default function Diagnostics() {
               <div className="flex items-center gap-2 mb-2"><Activity className="w-6 h-6" /><h2 className="font-display text-2xl font-bold">{LEVEL_FULL[result.lvl]}</h2></div>
               {result.why.map((w, i) => <p key={i} className="text-[15px] opacity-95 mt-1">• {w}</p>)}
             </div>
+            {result.lvl !== "G" && <CareRelief level={result.lvl} groups={groups(s.regions)} user={user} s={s} />}
             <div className="pm-card p-6">
               <h3 className="font-display text-lg font-bold text-pm-ink">What this could mean</h3>
               <p className="text-sm text-pm-muted">Possible patterns only, not a diagnosis.</p>
