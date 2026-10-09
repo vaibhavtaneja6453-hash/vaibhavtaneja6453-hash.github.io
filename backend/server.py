@@ -173,6 +173,8 @@ class ChatIn(BaseModel):
 @api_router.post("/auth/register")
 async def register(payload: RegisterIn, response: Response):
     email = payload.email.lower().strip()
+    if len(payload.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
     if await db.users.find_one({"email": email}):
         raise HTTPException(status_code=400, detail="An account with this email already exists")
     user_id = f"user_{uuid.uuid4().hex[:12]}"
