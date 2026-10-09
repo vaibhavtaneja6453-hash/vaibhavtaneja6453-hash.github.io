@@ -1,0 +1,232 @@
+{
+  "theme": {
+    "archetype": "ARCHETYPE 1: ORGANIC & EARTHY / CALM MEDICAL TEAL",
+    "mode": "both (Light primary default + Dark mode support with persistent toggle)",
+    "description": "Tactile clinical warmth with soothing oceanic teals, sage undertones, and crisp high-legibility typography designed specifically for patients in pain.",
+    "color_palette": {
+      "light": {
+        "primary": "#0b5c7d",
+        "primary_hover": "#084862",
+        "primary_foreground": "#ffffff",
+        "secondary": "#159a7a",
+        "secondary_hover": "#10785f",
+        "secondary_foreground": "#ffffff",
+        "accent": "#e6f5f3",
+        "accent_foreground": "#0b5c7d",
+        "background": "#f8fafb",
+        "surface": "#ffffff",
+        "surface_muted": "#f1f5f7",
+        "border": "#d2e3ea",
+        "border_subtle": "#e6edf1",
+        "text_main": "#122830",
+        "text_muted": "#52707e",
+        "severity_green": "#159a7a",
+        "severity_yellow": "#e59e19",
+        "severity_red": "#d94336"
+      },
+      "dark": {
+        "primary": "#1ba8bf",
+        "primary_hover": "#2dd4bf",
+        "primary_foreground": "#091e26",
+        "secondary": "#1fc49d",
+        "secondary_hover": "#34d399",
+        "secondary_foreground": "#07201c",
+        "accent": "#0d313d",
+        "accent_foreground": "#a5f3fc",
+        "background": "#071318",
+        "surface": "#0d1f27",
+        "surface_muted": "#132c37",
+        "border": "#1c3c4b",
+        "border_subtle": "#16313d",
+        "text_main": "#eff8fa",
+        "text_muted": "#96b4c2",
+        "severity_green": "#2fd8b0",
+        "severity_yellow": "#f59e0b",
+        "severity_red": "#f87171"
+      }
+    }
+  },
+  "typography": {
+    "headings": {
+      "family": "'Fraunces', serif, Georgia",
+      "weights": "600, 700",
+      "h1": "text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#122830] dark:text-[#eff8fa]",
+      "h2": "text-2xl sm:text-3xl font-semibold tracking-tight text-[#122830] dark:text-[#eff8fa]",
+      "h3": "text-xl sm:text-2xl font-medium tracking-tight text-[#122830] dark:text-[#eff8fa]",
+      "h4": "text-lg sm:text-xl font-medium text-[#122830] dark:text-[#eff8fa]"
+    },
+    "body": {
+      "family": "'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, sans-serif",
+      "lead": "text-lg text-[#52707e] dark:text-[#96b4c2] leading-relaxed",
+      "base": "text-base text-[#122830] dark:text-[#eff8fa] leading-normal",
+      "small": "text-sm text-[#52707e] dark:text-[#96b4c2]",
+      "eyebrow": "text-xs uppercase font-bold tracking-[0.2em] text-[#159a7a] dark:text-[#1fc49d]"
+    },
+    "font_cdn_import": "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&display=swap"
+  },
+  "layout_and_grids": {
+    "pwa_container": "max-w-md md:max-w-5xl lg:max-w-6xl mx-auto min-h-screen px-4 sm:px-6 lg:px-8 pb-24 md:pb-12 pt-20",
+    "mobile_nav_dock": "fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-[#0d1f27]/95 backdrop-blur-md border-t border-[#d2e3ea] dark:border-[#1c3c4b] py-2 px-6 flex justify-around items-center md:hidden",
+    "desktop_header": "sticky top-0 z-50 bg-white/90 dark:bg-[#071318]/90 backdrop-blur-md border-b border-[#d2e3ea] dark:border-[#1c3c4b] px-6 py-3.5 flex items-center justify-between",
+    "dashboard_grid": "grid grid-cols-1 md:grid-cols-12 gap-6",
+    "body_map_layout": "grid grid-cols-1 lg:grid-cols-12 gap-8 items-start",
+    "reviews_grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+  },
+  "image_urls": {
+    "hero_consultation": {
+      "url": "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHwyfHxwYXRpZW50JTIwZG9jdG9yJTIwc21pbGluZ3xlbnwwfHx8fDE3OTE1NTk3ODd8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Compassionate doctor consulting with patient in calm clinic",
+      "usage": "Landing page hero story & trust section"
+    },
+    "care_doctor_tablet": {
+      "url": "https://images.unsplash.com/photo-1631217873436-b0fa88e71f0a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHw0fHxwYXRpZW50JTIwZG9jdG9yJTIwc21pbGluZ3xlbnwwfHx8fDE3OTE1NTk3ODd8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Physician reviewing digital health records with patients",
+      "usage": "Diagnostics summary banner and doctor report preview"
+    },
+    "wellness_zen": {
+      "url": "https://images.unsplash.com/photo-1570506097811-83004c7e4691?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzV8MHwxfHNlYXJjaHwzfHx3ZWxsbmVzcyUyMGNhbG0lMjBuYXR1cmUlMjB0aGVyYXB5fGVufDB8fHx8MTc5MTU1OTc4N3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Stacked balanced therapy stones on coast representing chronic pain balance",
+      "usage": "Pain Diary empty state & mindfulness card"
+    },
+    "review_avatars": [
+      {
+        "id": "rev-1",
+        "name": "Elena Rostova",
+        "role": "Post-Op Physical Therapy Patient",
+        "url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?crop=entropy&cs=srgb&fm=jpg&q=85&w=200",
+        "rating": 5,
+        "date": "2 days ago",
+        "title": "Finally, my doctor understood where it hurts!",
+        "review": "Before PainMap I fumbled with words like 'it radiates around here somewhere'. Handing the generated PDF summary with the exact lumbar quadrant cut my appointment time in half."
+      },
+      {
+        "id": "rev-2",
+        "name": "Marcus Vance",
+        "role": "Chronic Migraine Tracker",
+        "url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=srgb&fm=jpg&q=85&w=200",
+        "rating": 5,
+        "date": "1 week ago",
+        "title": "Voice description feature is a lifesaver during flare-ups",
+        "review": "When I have a blinding cluster headache, typing is agonizing. I just tap voice, say 'throbbing behind left temple with nausea', and it maps it directly with the 8/10 severity slider."
+      },
+      {
+        "id": "rev-3",
+        "name": "Dr. Sarah Lin, MD",
+        "role": "Sports Medicine & Rehabilitation",
+        "url": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?crop=entropy&cs=srgb&fm=jpg&q=85&w=200",
+        "rating": 5,
+        "date": "2 weeks ago",
+        "title": "Clinically informative non-diagnostic communication",
+        "review": "The visual body map representation helps bridge patient sensation and our clinical diagnosis. The green/yellow/red triage helps patients prioritize urgent symptoms."
+      },
+      {
+        "id": "rev-4",
+        "name": "David Kalu",
+        "role": "Spinal Disc Rehabilitation",
+        "url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=srgb&fm=jpg&q=85&w=200",
+        "rating": 5,
+        "date": "3 weeks ago",
+        "title": "The statistics trend showed my recovery trajectory clearly",
+        "review": "Seeing my severity drop from an average 7.2 down to 2.8 over 4 weeks gave me hope and kept me disciplined with my rehab drills."
+      }
+    ]
+  },
+  "architecture_and_components": {
+    "routes": [
+      { "path": "/", "name": "LandingPage", "description": "Hero, value proposition, quick triage preview, CTA to start Diagnostics or Login" },
+      { "path": "/login", "name": "LoginPage", "description": "Email + Password login, Google Sign-In button, quick guest bypass, link to register" },
+      { "path": "/register", "name": "RegisterPage", "description": "Comprehensive onboarding with Gmail, phone number, name, address, emergency contact, password, age, blood type (A+, B+, O+, AB+, etc.), chronic conditions" },
+      { "path": "/diagnostics", "name": "DiagnosticsWizard", "description": "Interactive 4-step pain mapping flow (Profile -> Front/Back interactive SVG Body Map -> Symptoms & Voice -> Clinical Summary Report)" },
+      { "path": "/dashboard", "name": "UserDashboard", "description": "Patient control center: Pain Diary (shift history, filters, PDF export), Health Statistics & charts (severity trends, frequent regions), quick start new triage" },
+      { "path": "/reviews", "name": "CustomerReviewsPage", "description": "Verified patient reviews, ratings distribution breakdown, interactive user review submission modal with star rating and photo upload" }
+    ],
+    "body_map_specification": {
+      "view_toggle": "Front / Back toggle buttons with smooth state change",
+      "interactive_zones": [
+        { "id": "head_neck", "label": "Head & Cervical Neck", "view": "front_back", "severity_hint": "Tension, migraines, stiffness" },
+        { "id": "chest", "label": "Chest / Sternum", "view": "front", "severity_hint": "Sharp, tightness, breathing pain" },
+        { "id": "upper_back", "label": "Thoracic Upper Back & Trapezius", "view": "back", "severity_hint": "Aching, burning knots" },
+        { "id": "lower_back", "label": "Lumbar & Sacral Spine", "view": "back", "severity_hint": "Sciatica, dull throbbing, electric" },
+        { "id": "abdomen", "label": "Abdomen & Epigastric", "view": "front", "severity_hint": "Cramping, visceral, sharp spasms" },
+        { "id": "shoulders_arms", "label": "Shoulders & Upper Limbs", "view": "front_back", "severity_hint": "Rotator cuff, tingling, joint ache" },
+        { "id": "pelvis_hips", "label": "Pelvis & Hip Joints", "view": "front_back", "severity_hint": "Groin pinch, bursitis, stability" },
+        { "id": "knees_legs", "label": "Knees & Lower Limbs", "view": "front_back", "severity_hint": "Patellar ache, calf tightness" },
+        { "id": "feet_ankles", "label": "Ankles & Plantar Feet", "view": "front_back", "severity_hint": "Fasciitis, sprains, numbness" }
+      ],
+      "interaction_state": "Selected regions glow with cyan/teal outline and show pulsing pin indicators. Multi-select enabled."
+    },
+    "symptom_descriptors": {
+      "pain_types": ["Throbbing", "Sharp / Stabbing", "Dull Ache", "Burning / Hot", "Electric / Tingling", "Shooting", "Tightness / Stiff", "Exhausting / Heavy"],
+      "timing": ["Constant", "Intermittent", "Worse in Morning", "Worse at Night", "After Movement", "Rest Relieves"],
+      "voice_input": "Browser SpeechRecognition API integration with fallback text dictation simulation"
+    },
+    "ai_assistant_specification": {
+      "component": "FloatingAIAssistant.js",
+      "position": "fixed bottom-20 md:bottom-6 right-6 z-40",
+      "trigger": "Pill button with teal pulsing aura and 'Ask Nurse AI' badge",
+      "features": [
+        "Instant clarification on how to describe pain sensations",
+        "Pre-populated emergency warning signs (Red Flags)",
+        "Doctor appointment preparation checklists",
+        "Conversational memory during current session"
+      ]
+    }
+  },
+  "instructions_to_main_agent": [
+    "1. Replace default splash with comprehensive multi-route app using react-router-dom.",
+    "2. Ensure Google Sign-In is prominently featured on both /login and /register with mock auth handler that auto-populates user session.",
+    "3. On /register, capture all required fields: Gmail, phone number, full name, residential address, emergency contact name & phone, password, age, blood type dropdown (A+, A-, B+, B-, O+, O-, AB+, AB-), and optional existing conditions.",
+    "4. Store registered user info and mock auth token in localStorage so user remains logged in across reloads.",
+    "5. The Dashboard must house BOTH the Pain Diary (list of recorded sessions with date, pain regions, severity badge, doctor notes) and Statistics (Recharts: weekly severity trend line, pain distribution radar or bar chart, shift diary summary).",
+    "6. Customer Reviews page must feature rich patient cards with photos, verified badges, star ratings, and an 'Add Your Review' modal form allowing logged-in patients to post reviews that persist to localStorage.",
+    "7. Diagnostics flow: Step 1 Profile (Age, Biological Sex, Activity level) -> Step 2 Interactive SVG Body Map (Front/Back toggle with clickable anatomical pain hotspots) -> Step 3 Describe Pain (Chips + Free text textarea + Speech-to-Text Voice button) + 0-10 Pain Severity Slider -> Step 4 Clinical Summary (Color-coded Green Mild / Yellow Moderate / Red Urgent with doctor talking points and PDF/print action).",
+    "8. Floating AI Help Assistant: Available on all pages as a friendly teal assistant drawer/dialogue that guides the user on what symptoms mean without giving legal medical diagnosis.",
+    "9. Theme: Implement dark mode toggle with next-themes or state-driven 'dark' class on <html> document.",
+    "10. High accessibility: Use font sizes no smaller than text-sm, clear 4.5:1 contrast, distinct tap targets min 44x44px for mobile PWA usage.",
+    "11. Every interactive item, button, input, toggle, tab must have explicit kebab-case data-testid attributes."
+  ],
+  "universal_guidelines": {
+    "anti_patterns": [
+      "NO generic centered Bootstrap-style cards",
+      "NO dark colors used as full screen muddy gradients",
+      "NO emoji-only icons (use Lucide-react icons instead: HeartPulse, ShieldAlert, Sparkles, MessageCircle, etc.)",
+      "NO unstyled raw HTML <select> or <input type='date'>; style them cleanly with tailwind and shadcn patterns",
+      "NO transparent backgrounds on dropdowns, modals, and sticky navbars"
+    ],
+    "key_test_ids": {
+      "nav_home": "nav-link-home",
+      "nav_diagnostics": "nav-link-diagnostics",
+      "nav_dashboard": "nav-link-dashboard",
+      "nav_reviews": "nav-link-reviews",
+      "nav_login": "nav-link-login",
+      "nav_register": "nav-link-register",
+      "nav_theme_toggle": "nav-theme-toggle-btn",
+      "login_email_input": "login-email-input",
+      "login_password_input": "login-password-input",
+      "login_submit_btn": "login-submit-button",
+      "login_google_btn": "login-google-button",
+      "register_email_input": "register-email-input",
+      "register_phone_input": "register-phone-input",
+      "register_name_input": "register-name-input",
+      "register_address_input": "register-address-input",
+      "register_emergency_input": "register-emergency-contact-input",
+      "register_password_input": "register-password-input",
+      "register_age_input": "register-age-input",
+      "register_blood_type_select": "register-blood-type-select",
+      "register_submit_btn": "register-submit-button",
+      "diagnostics_start_btn": "diagnostics-start-button",
+      "body_map_toggle_front": "body-map-view-front-btn",
+      "body_map_toggle_back": "body-map-view-back-btn",
+      "body_map_region_head": "body-map-region-head_neck",
+      "body_map_region_lower_back": "body-map-region-lower_back",
+      "pain_slider": "pain-severity-slider",
+      "voice_input_btn": "pain-voice-dictation-btn",
+      "save_diary_entry_btn": "save-diary-entry-button",
+      "add_review_btn": "open-add-review-modal-btn",
+      "review_submit_btn": "submit-customer-review-btn",
+      "ai_assistant_toggle": "floating-ai-assistant-toggle-btn",
+      "ai_assistant_input": "ai-assistant-message-input",
+      "ai_assistant_send_btn": "ai-assistant-send-btn"
+    }
+  }
+}
