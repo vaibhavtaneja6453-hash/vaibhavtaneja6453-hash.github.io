@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { formatApiError } from "../lib/api";
@@ -15,7 +15,8 @@ const initial = {
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState(initial);
+  const location = useLocation();
+  const [form, setForm] = useState({ ...initial, email: location.state?.email || "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 

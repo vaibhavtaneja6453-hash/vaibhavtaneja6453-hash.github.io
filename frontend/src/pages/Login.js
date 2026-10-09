@@ -12,17 +12,24 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [noAccount, setNoAccount] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
     setError("");
+    setNoAccount(false);
     setLoading(true);
     try {
       await login(email, password);
       toast.success("Welcome back!");
       navigate("/dashboard");
     } catch (err) {
-      setError(formatApiError(err.response?.data?.detail) || err.message);
+      if (err.response?.status === 404) {
+        setNoAccount(true);
+        setError("No account found for this email. New here? Create an account.");
+      } else {
+        setError(formatApiError(err.response?.data?.detail) || err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -81,7 +88,16 @@ export default function Login() {
                 <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} data-testid="login-password-input" className="pm-input pl-10" placeholder="••••••••" />
               </div>
             </div>
-            {error && <p className="text-sm font-semibold" style={{ color: "var(--pm-red)" }} data-testid="login-error">{error}</p>}
+            {error && (
+              <div data-testid="login-error" className="text-sm">
+                <p className="font-semibold" style={{ color: noAccount ? "var(--pm-ink)" : "var(--pm-red)" }}>{error}</p>
+                {noAccount && (
+                  <button type="button" onClick={() => navigate("/register", { state: { email } })} data-testid="login-go-register-btn" className="pm-btn-alt w-full mt-3">
+                    Register with this email
+                  </button>
+                )}
+              </div>
+            )}
             <button type="submit" disabled={loading} data-testid="login-submit-button" className="pm-btn w-full">
               {loading ? "Signing in…" : <>Sign in <ArrowRight className="w-5 h-5" /></>}
             </button>

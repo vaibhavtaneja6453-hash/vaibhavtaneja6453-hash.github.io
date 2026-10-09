@@ -14,6 +14,7 @@ import Register from "@/pages/Register";
 import Diagnostics from "@/pages/Diagnostics";
 import Dashboard from "@/pages/Dashboard";
 import Reviews from "@/pages/Reviews";
+import Profile from "@/pages/Profile";
 
 function AppRouter() {
   const location = useLocation();
@@ -33,6 +34,7 @@ function AppRouter() {
         <Route path="/register" element={<Register />} />
         <Route path="/diagnostics" element={<ProtectedRoute><Diagnostics /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/reviews" element={<Reviews />} />
       </Routes>
       {!authPage && <FloatingAIAssistant />}

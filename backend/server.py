@@ -135,6 +135,18 @@ class LoginIn(BaseModel):
     password: str
 
 
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    emergency_contact_name: Optional[str] = None
+    emergency_contact_phone: Optional[str] = None
+    age: Optional[int] = None
+    blood_type: Optional[str] = None
+    conditions: Optional[str] = None
+    picture: Optional[str] = None
+
+
 class DiaryIn(BaseModel):
     level: str
     severity: int
@@ -205,8 +217,12 @@ async def register(payload: RegisterIn, response: Response):
 async def login(payload: LoginIn, response: Response):
     email = payload.email.lower().strip()
     user = await db.users.find_one({"email": email})
-    if not user or not user.get("password_hash") or not verify_password(payload.password, user["password_hash"]):
-        raise HTTPException(status_code=401, detail="Incorrect email or password")
+    if not user:
+        raise HTTPException(status_code=404, detail="No account found for this email. Please register first.")
+    if not user.get("password_hash"):
+        raise HTTPException(status_code=400, detail="This email is registered with Google. Please use 'Continue with Google'.")
+    if not verify_password(payload.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Incorrect password. Please try again.")
     token = await create_session(user["user_id"])
     set_session_cookie(response, token)
     return public_user(user)
@@ -261,6 +277,15 @@ async def logout(request: Request, response: Response):
         await db.user_sessions.delete_one({"session_token": token})
     response.delete_cookie("session_token", path="/")
     return {"ok": True}
+
+
+@api_router.patch("/auth/profile")
+async def update_profile(payload: ProfileUpdate, user: dict = Depends(get_current_user)):
+    updates = {k: v for k, v in payload.model_dump().items() if v is not None}
+    if updates:
+        await db.users.update_one({"user_id": user["user_id"]}, {"$set": updates})
+        user = await db.users.find_one({"user_id": user["user_id"]}, {"_id": 0})
+    return public_user(user)
 
 
 # ---------------------------------------------------------------------------
@@ -426,22 +451,22 @@ app.add_middleware(
 # Startup: indexes, admin seed, sample reviews
 # ---------------------------------------------------------------------------
 SAMPLE_REVIEWS = [
-    {"name": "Elena Rostova", "role": "Post-Op Physical Therapy Patient", "rating": 5,
-     "picture": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?crop=entropy&cs=srgb&fm=jpg&q=85&w=200",
-     "title": "Finally, my doctor understood where it hurts!",
-     "review": "Before Pain Map I fumbled with words like 'it radiates around here somewhere'. Handing the generated summary with the exact lumbar region cut my appointment time in half."},
-    {"name": "Marcus Vance", "role": "Chronic Migraine Tracker", "rating": 5,
-     "picture": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=srgb&fm=jpg&q=85&w=200",
-     "title": "Voice description is a lifesaver during flare-ups",
-     "review": "When I have a blinding headache, typing is agonizing. I just tap voice, say 'throbbing behind left temple with nausea', and it maps it with the 8/10 severity."},
-    {"name": "Dr. Sarah Lin, MD", "role": "Sports Medicine & Rehabilitation", "rating": 5,
-     "picture": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?crop=entropy&cs=srgb&fm=jpg&q=85&w=200",
-     "title": "Clinically informative, non-diagnostic communication",
-     "review": "The visual body map helps bridge patient sensation and our clinical assessment. The green/yellow/red triage helps patients prioritise urgent symptoms."},
-    {"name": "David Kalu", "role": "Spinal Disc Rehabilitation", "rating": 5,
-     "picture": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=srgb&fm=jpg&q=85&w=200",
-     "title": "The trend chart showed my recovery clearly",
-     "review": "Seeing my severity drop from 7.2 down to 2.8 over 4 weeks gave me hope and kept me disciplined with my rehab."},
+    {"name": "Aishwarya Taneja", "role": "Migraine & Neck Pain", "rating": 5,
+     "picture": "https://images.unsplash.com/photo-1573497019707-1c04de26e58c?crop=entropy&cs=srgb&fm=jpg&q=85&w=256",
+     "title": "I finally felt heard at my appointment",
+     "review": "I always struggled to explain my migraines. I showed my doctor the Pain Map summary with the exact spots and an 8/10 severity and she understood immediately. The follow-up trend chart is honestly brilliant."},
+    {"name": "Rajvir Saini", "role": "Lower Back Pain (Gym Injury)", "rating": 5,
+     "picture": "https://images.unsplash.com/photo-1649433658557-54cf58577c68?crop=entropy&cs=srgb&fm=jpg&q=85&w=256",
+     "title": "The body map is so simple to use",
+     "review": "After a deadlift injury I could point to the exact lower-back spot and the app flagged it Yellow and told me to get it checked. Turned out to be a muscle strain. Saved me a lot of panic and a wasted trip."},
+    {"name": "S. P. Yadav", "role": "Chronic Knee Pain · Age 64", "rating": 5,
+     "picture": "https://images.unsplash.com/photo-1779630986800-f0ed643f357b?crop=entropy&cs=srgb&fm=jpg&q=85&w=256",
+     "title": "Simple enough for someone my age",
+     "review": "The buttons are big and clear and the voice option makes it easy for me. I log my knee pain every evening and my son goes through the dashboard with me on weekends."},
+    {"name": "Tenzin Rawat", "role": "Sports Physiotherapy Patient", "rating": 5,
+     "picture": "https://images.unsplash.com/photo-1759755487703-91f22c31bfbd?crop=entropy&cs=srgb&fm=jpg&q=85&w=256",
+     "title": "Red / Yellow / Green gives real peace of mind",
+     "review": "During my rehab the colour guidance helped me know when pain was normal and when to call my physio. Watching my severity drop from 7 down to 2 kept me motivated every single day."},
 ]
 
 
@@ -471,13 +496,13 @@ async def on_startup():
             await db.users.update_one({"email": admin_email},
                                       {"$set": {"password_hash": hash_password(admin_password), "role": "admin"}})
 
-    if await db.reviews.count_documents({}) == 0:
-        base = now_utc()
-        for i, r in enumerate(SAMPLE_REVIEWS):
-            await db.reviews.insert_one({
-                **r, "id": str(uuid.uuid4()), "user_id": "seed", "verified": True,
-                "created_at": (base - timedelta(days=i * 3 + 1)).isoformat(),
-            })
+    await db.reviews.delete_many({"user_id": "seed"})
+    base = now_utc()
+    for i, r in enumerate(SAMPLE_REVIEWS):
+        await db.reviews.insert_one({
+            **r, "id": str(uuid.uuid4()), "user_id": "seed", "verified": True,
+            "created_at": (base - timedelta(days=i * 4 + 1)).isoformat(),
+        })
 
 
 @app.on_event("shutdown")
