@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { HOME_REMEDIES, RELIEF_VIDEOS, MANDALAS, RED_WAIT_TIPS } from "../lib/careContent";
-import { Leaf, PlayCircle, Flower2, PhoneCall, MessageCircle, Siren, HeartPulse, Wind } from "lucide-react";
+import { REGION_CONTENT, regionKeys, MANDALAS, RED_WAIT_TIPS } from "../lib/careContent";
+import { Leaf, PlayCircle, Flower2, PhoneCall, MessageCircle, Siren, HeartPulse, Wind, Send, Stethoscope } from "lucide-react";
 
 function buildWaLink(user, s) {
   let digits = (user?.emergency_contact_phone || "").replace(/[^0-9]/g, "");
@@ -18,7 +18,7 @@ function buildWaLink(user, s) {
     `A serious (RED) situation was flagged — pain in ${regions}, severity ${s.sev}/10` +
     (symptoms ? `, symptoms: ${symptoms}` : "") +
     `. Please reach them or call emergency services immediately. (Automated alert — not a medical diagnosis.)`;
-  return { digits: valid ? digits : "", url: `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` };
+  return { digits: valid ? digits : "", url: `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`, msg };
 }
 
 function dedupe(videos) {
@@ -27,9 +27,11 @@ function dedupe(videos) {
 }
 
 export default function CareRelief({ level, groups, user, s }) {
-  const grp = groups && groups.length ? groups : ["general"];
-  const remedies = [...new Set(grp.flatMap((g) => HOME_REMEDIES[g] || HOME_REMEDIES.general))].slice(0, 6);
-  const videos = dedupe([...grp.flatMap((g) => RELIEF_VIDEOS[g] || []), ...RELIEF_VIDEOS.general]).slice(0, 4);
+  const keys = regionKeys(s.regions);
+  const content = keys.map((k) => REGION_CONTENT[k] || REGION_CONTENT.general);
+  const assessList = [...new Set(content.map((c) => c.assess))];
+  const remedies = [...new Set(content.flatMap((c) => c.remedies))].slice(0, 6);
+  const videos = dedupe(content.flatMap((c) => c.videos)).slice(0, 4);
   const [active, setActive] = useState(null);
   const [mandala, setMandala] = useState(0);
   const [phase, setPhase] = useState("Breathe in…");
@@ -66,6 +68,11 @@ export default function CareRelief({ level, groups, user, s }) {
                 <MessageCircle className="w-5 h-5" /> Add an emergency contact
               </Link>
             )}
+            {wa.digits && (
+              <a href={`sms:${wa.digits}?body=${encodeURIComponent(wa.msg)}`} data-testid="emergency-sms-btn" className="pm-btn-alt">
+                <Send className="w-5 h-5" /> Send SMS alert
+              </a>
+            )}
           </div>
           <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--pm-border)" }}>
             <p className="text-sm font-bold text-pm-ink mb-1">While you wait for help</p>
@@ -88,9 +95,14 @@ export default function CareRelief({ level, groups, user, s }) {
             : "Gentle, safe things that often ease this kind of pain while you arrange a doctor visit. Stop anything that makes the pain worse."}
         </p>
 
+        <div className="mt-4 p-3.5 rounded-xl" style={{ background: "var(--pm-sel)" }} data-testid="care-assessment">
+          <div className="flex items-center gap-1.5 mb-1"><Stethoscope className="w-4 h-4 text-pm-secondary" /><p className="font-bold text-pm-ink text-sm">Assessing your pain</p></div>
+          {assessList.map((a, i) => <p key={i} className="text-sm text-pm-ink">• {a}</p>)}
+        </div>
+
         {/* Home remedies */}
         <div className="mt-5">
-          <div className="flex items-center gap-2 mb-2"><Leaf className="w-4 h-4 text-pm-secondary" /><h4 className="font-display font-bold text-pm-ink">Home remedies</h4></div>
+          <div className="flex items-center gap-2 mb-2"><Leaf className="w-4 h-4 text-pm-secondary" /><h4 className="font-display font-bold text-pm-ink">Home remedies for this area</h4></div>
           <div className="grid sm:grid-cols-2 gap-2.5">
             {remedies.map((r, i) => (
               <div key={i} className="flex gap-2.5 p-3 rounded-xl text-sm text-pm-ink" style={{ background: "var(--pm-surface-muted)" }} data-testid={`home-remedy-${i}`}>

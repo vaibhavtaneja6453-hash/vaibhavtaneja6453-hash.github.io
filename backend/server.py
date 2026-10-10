@@ -14,7 +14,7 @@ from typing import List, Optional
 import bcrypt
 import httpx
 from fastapi import FastAPI, APIRouter, Request, Response, HTTPException, Depends
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, RedirectResponse
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr
@@ -289,6 +289,126 @@ async def update_profile(payload: ProfileUpdate, user: dict = Depends(get_curren
 
 
 # ---------------------------------------------------------------------------
+# Social OAuth (Facebook + Microsoft) — coexist with Google / email-password
+# ---------------------------------------------------------------------------
+FB_APP_ID = os.environ.get("FACEBOOK_APP_ID", "")
+FB_APP_SECRET = os.environ.get("FACEBOOK_APP_SECRET", "")
+FB_GRAPH = os.environ.get("FACEBOOK_GRAPH_VERSION", "v21.0")
+MS_CLIENT_ID = os.environ.get("MICROSOFT_CLIENT_ID", "")
+MS_CLIENT_SECRET = os.environ.get("MICROSOFT_CLIENT_SECRET", "")
+MS_TENANT = os.environ.get("MICROSOFT_TENANT", "common")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+FB_CB = f"{FRONTEND_URL}/api/auth/facebook/callback"
+MS_CB = f"{FRONTEND_URL}/api/auth/microsoft/callback"
+
+
+@api_router.get("/auth/providers")
+async def auth_providers():
+    return {
+        "google": True,
+        "facebook": bool(FB_APP_ID and FB_APP_SECRET),
+        "microsoft": bool(MS_CLIENT_ID and MS_CLIENT_SECRET),
+    }
+
+
+async def _social_login(email, name, picture, provider, sub, response):
+    email = (email or "").lower().strip()
+    user = None
+    if sub:
+        user = await db.users.find_one({f"oauth_{provider}": sub})
+    if not user and email:
+        user = await db.users.find_one({"email": email})
+    if not user:
+        user = {
+            "user_id": f"user_{uuid.uuid4().hex[:12]}", "email": email, "name": name or "",
+            "picture": picture or "", "phone": "", "address": "",
+            "emergency_contact_name": "", "emergency_contact_phone": "", "age": None,
+            "blood_type": "", "conditions": "", "role": "patient",
+            "auth_provider": provider, f"oauth_{provider}": sub, "created_at": now_utc(),
+        }
+        await db.users.insert_one(user)
+    else:
+        upd = {f"oauth_{provider}": sub}
+        if picture and not user.get("picture"):
+            upd["picture"] = picture
+        await db.users.update_one({"user_id": user["user_id"]}, {"$set": upd})
+    token = await create_session(user["user_id"])
+    set_session_cookie(response, token)
+
+
+def _state_cookie(resp, state):
+    resp.set_cookie("oauth_state", state, max_age=600, httponly=True, secure=True, samesite="none", path="/")
+
+
+@api_router.get("/auth/facebook")
+async def facebook_start():
+    if not (FB_APP_ID and FB_APP_SECRET):
+        raise HTTPException(status_code=400, detail="Facebook login is not configured")
+    from urllib.parse import urlencode
+    state = secrets.token_urlsafe(24)
+    q = urlencode({"client_id": FB_APP_ID, "redirect_uri": FB_CB, "state": state, "scope": "public_profile,email"})
+    resp = RedirectResponse(f"https://www.facebook.com/{FB_GRAPH}/dialog/oauth?{q}")
+    _state_cookie(resp, state)
+    return resp
+
+
+@api_router.get("/auth/facebook/callback")
+async def facebook_callback(request: Request, code: str = None, state: str = None, error: str = None):
+    expected = request.cookies.get("oauth_state")
+    if error or not code or not state or state != expected:
+        return RedirectResponse(f"{FRONTEND_URL}/login?error=facebook")
+    base = f"https://graph.facebook.com/{FB_GRAPH}"
+    async with httpx.AsyncClient(timeout=10) as c:
+        tok = await c.get(f"{base}/oauth/access_token", params={
+            "client_id": FB_APP_ID, "client_secret": FB_APP_SECRET, "redirect_uri": FB_CB, "code": code})
+        if tok.status_code != 200:
+            return RedirectResponse(f"{FRONTEND_URL}/login?error=facebook")
+        at = tok.json().get("access_token")
+        prof = await c.get(f"{base}/me", params={"fields": "id,name,email,picture", "access_token": at})
+    p = prof.json()
+    pic = (p.get("picture") or {}).get("data", {}).get("url", "")
+    resp = RedirectResponse(f"{FRONTEND_URL}/dashboard")
+    await _social_login(p.get("email"), p.get("name"), pic, "facebook", p.get("id"), resp)
+    resp.delete_cookie("oauth_state", path="/")
+    return resp
+
+
+@api_router.get("/auth/microsoft")
+async def microsoft_start():
+    if not (MS_CLIENT_ID and MS_CLIENT_SECRET):
+        raise HTTPException(status_code=400, detail="Microsoft login is not configured")
+    from urllib.parse import urlencode
+    state = secrets.token_urlsafe(24)
+    authority = f"https://login.microsoftonline.com/{MS_TENANT}/oauth2/v2.0"
+    q = urlencode({"client_id": MS_CLIENT_ID, "response_type": "code", "redirect_uri": MS_CB,
+                   "response_mode": "query", "scope": "openid profile email", "state": state})
+    resp = RedirectResponse(f"{authority}/authorize?{q}")
+    _state_cookie(resp, state)
+    return resp
+
+
+@api_router.get("/auth/microsoft/callback")
+async def microsoft_callback(request: Request, code: str = None, state: str = None, error: str = None):
+    expected = request.cookies.get("oauth_state")
+    if error or not code or not state or state != expected:
+        return RedirectResponse(f"{FRONTEND_URL}/login?error=microsoft")
+    authority = f"https://login.microsoftonline.com/{MS_TENANT}/oauth2/v2.0"
+    async with httpx.AsyncClient(timeout=10) as c:
+        tok = await c.post(f"{authority}/token", data={
+            "client_id": MS_CLIENT_ID, "client_secret": MS_CLIENT_SECRET, "grant_type": "authorization_code",
+            "code": code, "redirect_uri": MS_CB, "scope": "openid profile email"})
+        if tok.status_code != 200:
+            return RedirectResponse(f"{FRONTEND_URL}/login?error=microsoft")
+        at = tok.json().get("access_token")
+        info = await c.get("https://graph.microsoft.com/oidc/userinfo", headers={"Authorization": f"Bearer {at}"})
+    p = info.json()
+    resp = RedirectResponse(f"{FRONTEND_URL}/dashboard")
+    await _social_login(p.get("email") or p.get("preferred_username"), p.get("name"), "", "microsoft", p.get("sub"), resp)
+    resp.delete_cookie("oauth_state", path="/")
+    return resp
+
+
+# ---------------------------------------------------------------------------
 # Diary + stats
 # ---------------------------------------------------------------------------
 @api_router.post("/diary")
@@ -476,6 +596,8 @@ async def on_startup():
     await db.users.create_index("user_id")
     await db.user_sessions.create_index("session_token")
     await db.diary_entries.create_index("user_id")
+    await db.users.create_index("oauth_facebook", sparse=True)
+    await db.users.create_index("oauth_microsoft", sparse=True)
 
     admin_email = os.environ.get("ADMIN_EMAIL", "").lower().strip()
     admin_password = os.environ.get("ADMIN_PASSWORD", "")

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
-import { formatApiError } from "../lib/api";
+import { api, API, formatApiError } from "../lib/api";
 import { BLOOD_TYPES } from "../lib/painEngine";
 import { HeartPulse, ArrowRight } from "lucide-react";
 
@@ -19,6 +19,11 @@ export default function Register() {
   const [form, setForm] = useState({ ...initial, email: location.state?.email || "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [providers, setProviders] = useState({ google: true, facebook: false, microsoft: false });
+
+  useEffect(() => {
+    api.get("/auth/providers").then(({ data }) => setProviders(data)).catch(() => {});
+  }, []);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -68,6 +73,18 @@ export default function Register() {
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" className="w-5 h-5" />
           Sign up with Google
         </button>
+        {providers.facebook && (
+          <button onClick={() => (window.location.href = `${API}/auth/facebook`)} data-testid="register-facebook-button" className="pm-btn-alt w-full mt-3">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="" className="w-5 h-5" />
+            Sign up with Facebook
+          </button>
+        )}
+        {providers.microsoft && (
+          <button onClick={() => (window.location.href = `${API}/auth/microsoft`)} data-testid="register-microsoft-button" className="pm-btn-alt w-full mt-3">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="" className="w-5 h-5" />
+            Sign up with Microsoft
+          </button>
+        )}
         <div className="flex items-center gap-3 my-5 text-pm-muted text-sm">
           <span className="h-px flex-1" style={{ background: "var(--pm-border)" }} /> or fill in your details <span className="h-px flex-1" style={{ background: "var(--pm-border)" }} />
         </div>

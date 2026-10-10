@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
-import { formatApiError } from "../lib/api";
+import { api, API, formatApiError } from "../lib/api";
 import { HeartPulse, Mail, Lock, ArrowRight } from "lucide-react";
 
 export default function Login() {
@@ -13,6 +13,13 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [noAccount, setNoAccount] = useState(false);
+  const [providers, setProviders] = useState({ google: true, facebook: false, microsoft: false });
+
+  useEffect(() => {
+    api.get("/auth/providers").then(({ data }) => setProviders(data)).catch(() => {});
+    const err = new URLSearchParams(window.location.search).get("error");
+    if (err) toast.error(`${err === "facebook" ? "Facebook" : "Microsoft"} sign-in failed. Please try again.`);
+  }, []);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -68,6 +75,18 @@ export default function Login() {
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" className="w-5 h-5" />
             Continue with Google
           </button>
+          {providers.facebook && (
+            <button onClick={() => (window.location.href = `${API}/auth/facebook`)} data-testid="login-facebook-button" className="pm-btn-alt w-full mt-3">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="" className="w-5 h-5" />
+              Continue with Facebook
+            </button>
+          )}
+          {providers.microsoft && (
+            <button onClick={() => (window.location.href = `${API}/auth/microsoft`)} data-testid="login-microsoft-button" className="pm-btn-alt w-full mt-3">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="" className="w-5 h-5" />
+              Continue with Microsoft
+            </button>
+          )}
 
           <div className="flex items-center gap-3 my-5 text-pm-muted text-sm">
             <span className="h-px flex-1" style={{ background: "var(--pm-border)" }} /> or <span className="h-px flex-1" style={{ background: "var(--pm-border)" }} />
