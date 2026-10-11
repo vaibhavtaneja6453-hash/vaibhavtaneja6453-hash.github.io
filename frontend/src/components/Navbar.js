@@ -1,8 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import { HeartPulse, Home, Stethoscope, LayoutDashboard, Star, Moon, Sun, LogOut, LogIn, User, ChevronDown } from "lucide-react";
+import { HeartPulse, Home, Stethoscope, LayoutDashboard, Star, Moon, Sun, LogIn } from "lucide-react";
+import { UserMenu } from "./nav/UserMenu";
+import { MobileDock } from "./nav/MobileDock";
 
 const navItems = [
   { to: "/", label: "Home", icon: Home, testid: "nav-link-home", end: true },
@@ -11,29 +13,10 @@ const navItems = [
   { to: "/reviews", label: "Reviews", icon: Star, testid: "nav-link-reviews" },
 ];
 
-function Avatar({ user, size = 32 }) {
-  const initials = (user?.name || user?.email || "?").trim()[0]?.toUpperCase();
-  if (user?.picture)
-    return <img src={user.picture} alt="" className="rounded-full object-cover" style={{ width: size, height: size }} />;
-  return (
-    <span className="rounded-full grid place-items-center text-white font-bold" style={{ width: size, height: size, background: "var(--pm-primary)", fontSize: size * 0.42 }}>
-      {initials}
-    </span>
-  );
-}
-
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef(null);
-
-  useEffect(() => {
-    const h = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); };
-    document.addEventListener("mousedown", h);
-    return () => document.removeEventListener("mousedown", h);
-  }, []);
 
   const onLogout = async () => {
     await logout();
@@ -80,30 +63,7 @@ export default function Navbar() {
               {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
             {user ? (
-              <div className="relative" ref={menuRef}>
-                <button onClick={() => setMenuOpen((o) => !o)} data-testid="nav-user-menu-btn"
-                  className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full border transition-colors hover:border-pm-secondary" style={{ borderColor: "var(--pm-border)" }}>
-                  <Avatar user={user} />
-                  <ChevronDown className="w-4 h-4 text-pm-muted" />
-                </button>
-                {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 pm-card p-2 z-50">
-                    <div className="px-3 py-2">
-                      <p className="font-bold text-pm-ink text-sm truncate">{user.name || "You"}</p>
-                      <p className="text-xs text-pm-muted truncate">{user.email}</p>
-                    </div>
-                    <div className="h-px my-1" style={{ background: "var(--pm-border)" }} />
-                    <button onClick={() => { setMenuOpen(false); navigate("/profile"); }} data-testid="nav-profile-btn"
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-pm-ink hover:bg-pm-surfaceMuted">
-                      <User className="w-4 h-4" /> My profile
-                    </button>
-                    <button onClick={() => { setMenuOpen(false); onLogout(); }} data-testid="nav-logout-btn"
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold hover:bg-pm-surfaceMuted" style={{ color: "var(--pm-red)" }}>
-                      <LogOut className="w-4 h-4" /> Sign out
-                    </button>
-                  </div>
-                )}
-              </div>
+              <UserMenu user={user} onLogout={onLogout} onProfile={() => navigate("/profile")} />
             ) : (
               <NavLink to="/login" data-testid="nav-link-login" className="pm-btn !min-h-[40px] !py-2 !px-4 text-sm">
                 <LogIn className="w-4 h-4" /> Login
@@ -113,39 +73,7 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile bottom dock */}
-      <nav
-        className="fixed bottom-0 inset-x-0 z-40 md:hidden flex justify-around items-center py-1.5 px-2 border-t backdrop-blur-md"
-        style={{ background: "color-mix(in srgb, var(--pm-surface) 94%, transparent)", borderColor: "var(--pm-border)" }}
-      >
-        {navItems.map((n) => (
-          <NavLink
-            key={n.to}
-            to={n.to}
-            end={n.end}
-            data-testid={`${n.testid}-mobile`}
-            className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[11px] font-bold ${
-                isActive ? "text-pm-secondary" : "text-pm-muted"
-              }`
-            }
-          >
-            <n.icon className="w-5 h-5" />
-            {n.label}
-          </NavLink>
-        ))}
-        {user ? (
-          <NavLink to="/profile" end data-testid="nav-link-profile-mobile"
-            className={({ isActive }) => `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[11px] font-bold ${isActive ? "text-pm-secondary" : "text-pm-muted"}`}>
-            <User className="w-5 h-5" /> Profile
-          </NavLink>
-        ) : (
-          <NavLink to="/login" data-testid="nav-link-login-mobile"
-            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-pm-muted">
-            <LogIn className="w-5 h-5" /> Login
-          </NavLink>
-        )}
-      </nav>
+      <MobileDock navItems={navItems} user={user} />
     </>
   );
 }

@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { MessageCircle, X, Send, Sparkles } from "lucide-react";
+import { AiMessageList } from "./ai/AiMessageList";
 
 const QUICK = ["How do I use this?", "What do the colours mean?", "Is my data safe?", "Explain pain severity", "Emergency help"];
+const WELCOME = "Hi! I'm the Pain Map assistant. Ask me how to use the app, what the colours mean, or anything about describing your pain. I can't diagnose or prescribe.";
 
 export default function FloatingAIAssistant() {
   const { user } = useAuth();
@@ -11,17 +13,10 @@ export default function FloatingAIAssistant() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
-  const bodyRef = useRef(null);
 
   useEffect(() => {
-    if (open && messages.length === 0) {
-      setMessages([{ role: "assistant", content: "Hi! I'm the Pain Map assistant. Ask me how to use the app, what the colours mean, or anything about describing your pain. I can't diagnose or prescribe." }]);
-    }
+    if (open) setMessages((m) => (m.length === 0 ? [{ role: "assistant", content: WELCOME }] : m));
   }, [open]);
-
-  useEffect(() => {
-    if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
-  }, [messages, busy]);
 
   const send = async (text) => {
     const q = (text ?? input).trim();
@@ -79,20 +74,7 @@ export default function FloatingAIAssistant() {
             </button>
           </div>
 
-          <div ref={bodyRef} className="flex-1 overflow-auto p-3 flex flex-col gap-2.5" style={{ background: "var(--pm-bg)" }}>
-            {messages.map((m, i) => (
-              <div
-                key={`${m.role}-${i}`}
-                className={`max-w-[88%] px-3.5 py-2.5 rounded-2xl text-[15px] leading-snug whitespace-pre-line ${
-                  m.role === "user" ? "self-end text-white" : "self-start"
-                }`}
-                style={m.role === "user" ? { background: "var(--pm-secondary)" } : { background: "var(--pm-surface)", border: "1px solid var(--pm-border)", color: "var(--pm-ink)" }}
-              >
-                {m.content}
-              </div>
-            ))}
-            {busy && <div className="self-start px-3.5 py-2.5 rounded-2xl text-pm-muted text-sm" style={{ background: "var(--pm-surface)", border: "1px solid var(--pm-border)" }}>Thinking…</div>}
-          </div>
+          <AiMessageList messages={messages} busy={busy} />
 
           <div className="px-3 pt-2 flex gap-1.5 flex-wrap max-h-24 overflow-auto" style={{ background: "var(--pm-surface)" }}>
             {QUICK.map((q) => (

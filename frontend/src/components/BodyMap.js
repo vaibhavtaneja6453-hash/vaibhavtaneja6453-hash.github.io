@@ -1,5 +1,6 @@
 import React from "react";
 import { regionsForView } from "../lib/painEngine";
+import { regionStyle } from "./bodyMapStyle";
 
 export default function BodyMap({ view, regions, onToggle, counts = null }) {
   const shapes = regionsForView(view);
@@ -10,19 +11,7 @@ export default function BodyMap({ view, regions, onToggle, counts = null }) {
     <svg viewBox="0 0 200 410" className="w-full max-w-[280px] mx-auto select-none" role="group" aria-label={`${back ? "Back" : "Front"} body map`}>
       {shapes.map((r) => {
         const selected = regions.includes(r.name);
-        let fill = "var(--pm-sel)";
-        let stroke = "var(--pm-primary)";
-        let opacity = 1;
-        if (counts) {
-          const c = counts[r.name] || 0;
-          fill = c ? "var(--pm-red)" : "var(--pm-surface-muted)";
-          opacity = c ? 0.25 + 0.75 * (c / max) : 1;
-          stroke = c ? "var(--pm-red)" : "var(--pm-border)";
-        } else if (selected) {
-          fill = "var(--pm-red)";
-          stroke = "var(--pm-red)";
-          opacity = 0.85;
-        }
+        const { fill, stroke, opacity } = regionStyle(r, { selected, counts, max });
         const common = {
           fill,
           stroke,
