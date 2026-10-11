@@ -20,7 +20,7 @@ export const RELIEF_VIDEOS = {
     { id: "60Gnd8Wy0gE", title: "Soothing meditation music" },
   ],
   back: [
-    { id: "DxIeqiyYZkQ", title: "9-minute lower-back relief routine" },
+    { id: "WQ6p2ZDhCS8", title: "9-minute lower-back relief routine" },
     { id: "aMJER9zwIY8", title: "7-minute fast back relief" },
   ],
   limb: [
@@ -179,7 +179,7 @@ export const REGION_CONTENT = {
       "Pelvic tilts, knee-to-chest and lumbar rotations, pain-free.",
       "Support your lower back when sitting; lift with your legs.",
     ],
-    videos: [{ id: "DxIeqiyYZkQ", title: "9-minute lower-back relief routine" }, { id: "aMJER9zwIY8", title: "7-minute fast back relief" }],
+    videos: [{ id: "WQ6p2ZDhCS8", title: "9-minute lower-back relief routine" }, { id: "aMJER9zwIY8", title: "7-minute fast back relief" }],
   },
   pelvis: {
     assess: "Pelvis / groin / hip pain can be muscle strain, hip-joint irritation or a groin pull.",
@@ -199,7 +199,7 @@ export const REGION_CONTENT = {
       "Figure-4 / piriformis stretch and gentle knee-to-chest.",
       "If pain shoots down the leg, keep stretches gentle and get it checked.",
     ],
-    videos: [{ id: "3Ymjw7TSzrE", title: "Glute, hip & piriformis stretches" }, { id: "DxIeqiyYZkQ", title: "Lower-back & glute relief routine" }],
+    videos: [{ id: "3Ymjw7TSzrE", title: "Glute, hip & piriformis stretches" }, { id: "WQ6p2ZDhCS8", title: "Lower-back & glute relief routine" }],
   },
   thigh: {
     assess: "Thigh pain is usually a hamstring or quad muscle strain from activity.",

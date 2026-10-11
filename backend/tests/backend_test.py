@@ -98,6 +98,28 @@ def test_google_session_invalid():
     assert r.status_code == 401
 
 
+# ---- OAuth providers gating ----
+def test_auth_providers_endpoint():
+    r = requests.get(f"{API}/auth/providers")
+    assert r.status_code == 200
+    data = r.json()
+    # Google env may or may not be configured; facebook & microsoft must be False (envs empty)
+    assert data.get("facebook") is False
+    assert data.get("microsoft") is False
+    assert "google" in data
+
+
+def test_facebook_start_unconfigured_returns_400():
+    r = requests.get(f"{API}/auth/facebook", allow_redirects=False)
+    assert r.status_code == 400
+
+
+def test_microsoft_start_unconfigured_returns_400():
+    r = requests.get(f"{API}/auth/microsoft", allow_redirects=False)
+    assert r.status_code == 400
+
+
+
 # ---- Diary ----
 def test_diary_crud_and_stats(registered_session):
     s, _ = registered_session

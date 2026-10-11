@@ -45,7 +45,13 @@ and an enhanced display/theme.
 - Floating AI assistant, dark/light theme toggle, mobile bottom nav.
 - Tested: backend 100% (15 pytest), frontend 100% (Playwright E2E). No bugs found.
 
+## Implemented (2026-10-09, later session)
+- Facebook + Microsoft OAuth (authorization-code) added in server.py, gated on env creds (FACEBOOK_APP_ID/SECRET, MICROSOFT_CLIENT_ID/SECRET/TENANT). GET /api/auth/providers drives button visibility; buttons hidden until creds added. Coexists with Google + email/password (same users collection, oauth_<provider> sub fields, sparse indexes).
+- Deep body-part-specific Care & Relief: REGION_CONTENT keyed by 16 body areas (head, neck, shoulder, upper_arm/biceps, forearm, hand, chest, upper_back, abdomen, lower_back, pelvis, buttocks, thigh, knee, shin_calf, foot) with tailored assessment text, home remedies, and real follow-along YouTube rehab videos. regionKeys() maps selected regions.
+- RED emergency: one-tap WhatsApp + SMS alert to emergency contact (phone normalised to +91 for 10-digit), Call 112, add-contact fallback.
+
 ## Backlog (P1/P2)
+- To enable Facebook/Microsoft login: user must create provider apps, set redirect URIs to {APP}/api/auth/facebook|microsoft/callback, and add the client IDs/secrets to backend .env.
 - PDF export of doctor summary (prototype had it).
 - Hindi/English language toggle (prototype had it).
 - PWA install + offline service worker.

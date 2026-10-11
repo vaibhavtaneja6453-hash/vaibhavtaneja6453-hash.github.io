@@ -208,6 +208,6 @@ function formatDuration(ms) {
   } else {
     return `${seconds}s`;
   }
-}
+} 
 
 module.exports = setupHealthEndpoints;
