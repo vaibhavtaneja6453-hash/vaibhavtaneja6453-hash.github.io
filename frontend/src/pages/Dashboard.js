@@ -55,12 +55,13 @@ export default function Dashboard() {
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       {/* Header + profile */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+      <div className="rounded-3xl p-6 sm:p-8 mb-6 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4" style={{ background: "linear-gradient(135deg,var(--pm-primary),var(--pm-secondary))" }}>
         <div>
-          <h1 className="font-display text-3xl font-bold text-pm-ink">Welcome, {user?.name?.split(" ")[0] || "there"}</h1>
-          <p className="text-pm-muted mt-1">Your pain diary and health statistics, all in one place.</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-80">Statistics</p>
+          <h1 className="font-display text-3xl font-bold mt-1">Welcome, {user?.name?.split(" ")[0] || "there"}</h1>
+          <p className="opacity-90 mt-1">Your pain statistics and diary, all in one place.</p>
         </div>
-        <button onClick={() => navigate("/diagnostics")} data-testid="dashboard-new-check-btn" className="pm-btn"><Stethoscope className="w-5 h-5" /> New pain check</button>
+        <button onClick={() => navigate("/diagnostics")} data-testid="dashboard-new-check-btn" className="inline-flex items-center justify-center gap-2 bg-white font-bold px-5 py-3 rounded-2xl shrink-0" style={{ color: "var(--pm-primary)" }}><Stethoscope className="w-5 h-5" /> New pain check</button>
       </div>
 
       {/* Profile strip */}

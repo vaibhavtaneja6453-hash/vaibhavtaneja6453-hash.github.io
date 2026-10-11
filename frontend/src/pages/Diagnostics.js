@@ -11,7 +11,7 @@ import {
 } from "../lib/painEngine";
 import { ChevronLeft, ChevronRight, Mic, Copy, Save, RotateCcw, Stethoscope, Activity } from "lucide-react";
 
-const STEPS = ["Profile", "Where", "Describe", "Questions", "Result"];
+const STEPS = ["Where", "Describe", "Questions", "Result"];
 
 const emptyState = {
   age: "", sex: "Prefer not to say", view: "front", regions: [],
@@ -22,7 +22,7 @@ export default function Diagnostics() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [step, setStep] = useState(0);
-  const [s, setS] = useState({ ...emptyState });
+  const [s, setS] = useState(() => ({ ...emptyState, age: user?.age ?? "" }));
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -45,9 +45,9 @@ export default function Diagnostics() {
 
   const pickSingle = (key, val) => update({ [key]: s[key] === val ? "" : val });
 
-  const result = useMemo(() => (step === 4 ? analyse(s) : null), [step, s]);
+  const result = useMemo(() => (step === 3 ? analyse(s) : null), [step, s]);
 
-  const canNext = step === 0 ? s.age !== "" && +s.age >= 0 && +s.age <= 120 : step === 1 ? s.regions.length > 0 : true;
+  const canNext = step === 0 ? s.regions.length > 0 : true;
 
   const go = (n) => { setStep(n); window.scrollTo(0, 0); };
 
@@ -89,7 +89,7 @@ export default function Diagnostics() {
     }
   };
 
-  const restart = () => { setS({ ...emptyState }); setSaved(false); setStep(0); window.scrollTo(0, 0); };
+  const restart = () => { setS({ ...emptyState, age: user?.age ?? "" }); setSaved(false); setStep(0); window.scrollTo(0, 0); };
 
   const Chips = ({ list, value, multi, testid }) => (
     <div className="flex flex-wrap gap-2 mt-2">
@@ -120,24 +120,11 @@ export default function Diagnostics() {
         ))}
       </div>
       <div className="h-2 rounded-full mb-6" style={{ background: "var(--pm-border)" }}>
-        <div className="h-full rounded-full transition-all duration-300" style={{ width: `${(step + 1) * 20}%`, background: "linear-gradient(90deg,var(--pm-primary),var(--pm-secondary))" }} />
+        <div className="h-full rounded-full transition-all duration-300" style={{ width: `${(step + 1) * 25}%`, background: "linear-gradient(90deg,var(--pm-primary),var(--pm-secondary))" }} />
       </div>
 
       <motion.div key={step} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         {step === 0 && (
-          <div className="pm-card p-6">
-            <h2 className="font-display text-xl font-bold text-pm-ink mb-4">About you</h2>
-            <label className="pm-label">Age</label>
-            <input type="number" min={0} max={120} value={s.age} onChange={(e) => update({ age: e.target.value })} data-testid="diag-age-input" className="pm-input" placeholder="e.g. 30" />
-            <label className="pm-label mt-4">Sex (optional)</label>
-            <select value={s.sex} onChange={(e) => update({ sex: e.target.value })} data-testid="diag-sex-select" className="pm-input">
-              <option>Prefer not to say</option><option>Female</option><option>Male</option><option>Other</option>
-            </select>
-            <p className="text-sm text-pm-muted mt-4">These answers stay with your account and help interpret your result.</p>
-          </div>
-        )}
-
-        {step === 1 && (
           <div className="space-y-4">
             <div className="pm-card p-6">
               <h2 className="font-display text-xl font-bold text-pm-ink mb-3">Tap where it hurts</h2>
@@ -162,7 +149,7 @@ export default function Diagnostics() {
           </div>
         )}
 
-        {step === 2 && (
+        {step === 1 && (
           <div className="pm-card p-6">
             <h2 className="font-display text-xl font-bold text-pm-ink mb-2">What does it feel like?</h2>
             <Chips list={DESC} value={s.desc} multi testid="desc" />
@@ -172,7 +159,7 @@ export default function Diagnostics() {
           </div>
         )}
 
-        {step === 3 && (
+        {step === 2 && (
           <div className="pm-card p-6 space-y-5">
             <h2 className="font-display text-xl font-bold text-pm-ink">A few quick questions</h2>
             <div>
@@ -199,7 +186,7 @@ export default function Diagnostics() {
           </div>
         )}
 
-        {step === 4 && result && (
+        {step === 3 && result && (
           <div className="space-y-4">
             <div className="rounded-3xl p-6 text-white shadow-lg" style={{ background: { G: "linear-gradient(135deg,#0f8a6a,#27b58c)", Y: "linear-gradient(135deg,#a87800,#d49a00)", R: "linear-gradient(135deg,#c0283a,#e5535f)" }[result.lvl] }} data-testid="diag-result-banner" data-level={result.lvl}>
               <div className="flex items-center gap-2 mb-2"><Activity className="w-6 h-6" /><h2 className="font-display text-2xl font-bold">{LEVEL_FULL[result.lvl]}</h2></div>
@@ -219,7 +206,7 @@ export default function Diagnostics() {
               <div className="flex flex-wrap gap-3 mt-4">
                 <button onClick={copySummary} data-testid="copy-summary-btn" className="pm-btn"><Copy className="w-5 h-5" /> Copy / share</button>
                 <button onClick={saveEntry} disabled={saving || saved} data-testid="save-diary-entry-button" className="pm-btn-alt"><Save className="w-5 h-5" /> {saved ? "Saved" : saving ? "Saving…" : "Save to diary"}</button>
-                <button onClick={() => navigate("/dashboard")} data-testid="go-dashboard-btn" className="pm-btn-alt">View dashboard</button>
+                <button onClick={() => navigate("/dashboard")} data-testid="go-dashboard-btn" className="pm-btn-alt">View statistics</button>
               </div>
             </div>
           </div>
@@ -228,15 +215,15 @@ export default function Diagnostics() {
 
       {/* nav buttons */}
       <div className="flex gap-3 mt-6">
-        {step > 0 && step < 4 && (
+        {step > 0 && step < 3 && (
           <button onClick={() => go(step - 1)} data-testid="diag-back-btn" className="pm-btn-alt"><ChevronLeft className="w-5 h-5" /> Back</button>
         )}
-        {step < 4 && (
+        {step < 3 && (
           <button onClick={() => go(step + 1)} disabled={!canNext} data-testid="diag-next-btn" className="pm-btn ml-auto">
-            {step === 3 ? "See my summary" : "Next"} <ChevronRight className="w-5 h-5" />
+            {step === 2 ? "See my summary" : "Next"} <ChevronRight className="w-5 h-5" />
           </button>
         )}
-        {step === 4 && (
+        {step === 3 && (
           <button onClick={restart} data-testid="diag-restart-btn" className="pm-btn-alt ml-auto"><RotateCcw className="w-5 h-5" /> Start over</button>
         )}
       </div>

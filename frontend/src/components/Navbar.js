@@ -7,7 +7,7 @@ import { HeartPulse, Home, Stethoscope, LayoutDashboard, Star, Moon, Sun, LogOut
 const navItems = [
   { to: "/", label: "Home", icon: Home, testid: "nav-link-home", end: true },
   { to: "/diagnostics", label: "Diagnostics", icon: Stethoscope, testid: "nav-link-diagnostics" },
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, testid: "nav-link-dashboard" },
+  { to: "/dashboard", label: "Statistics", icon: LayoutDashboard, testid: "nav-link-dashboard" },
   { to: "/reviews", label: "Reviews", icon: Star, testid: "nav-link-reviews" },
 ];
 
