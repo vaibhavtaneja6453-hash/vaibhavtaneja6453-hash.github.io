@@ -57,3 +57,12 @@ and an enhanced display/theme.
 - PWA install + offline service worker.
 - Password reset / brute-force lockout; auth-gate the assistant endpoint.
 - Per-user diary backup export/import.
+
+
+## Changelog
+- 2026-06 — Code-review safe fixes: removed hardcoded test secret (env), fixed empty catch in AuthContext, replaced array-index React keys with stable keys, `is True/False` → `==` in tests.
+- 2026-06 — Refactor + hook-dep pass (verified, iteration_8, frontend 100%):
+  - Extracted components: Navbar → nav/UserMenu + nav/MobileDock; Dashboard → dashboard/{ProfileStrip,StatCards,DiaryCharts,DiaryList}; CareRelief → care/{EmergencyAlert,ReliefVideos,MandalaBreathe,emergency}; FloatingAIAssistant → ai/AiMessageList; BodyMap → bodyMapStyle helper.
+  - Hook fixes: FloatingAIAssistant welcome-seed effect no longer reads messages.length from closure (sole real eslint warning cleared); Reviews/Dashboard `load` wrapped in useCallback. Build now compiles with 0 warnings.
+  - Verified: onboarding inputs retain focus while typing (OnbInput is module-level), mandala gating (shown chest/head/back, hidden limbs), navbar menu, dashboard sections, diagnostics red flow + emergency alert, AI assistant signed-in-only.
+  - Note: painEngine.analyse and careContent.regionKeys (pure logic, high complexity) left intact to avoid regressions in the core diagnostic engine.
