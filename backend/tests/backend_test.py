@@ -290,3 +290,95 @@ def test_logout_clears_session(registered_session):
     assert r.status_code == 200
     r = s2.get(f"{API}/auth/me")
     assert r.status_code == 401
+
+
+# ---- Onboarding / profile_complete flag ----
+def test_admin_profile_complete_true(admin_session):
+    r = admin_session.get(f"{API}/auth/me")
+    assert r.status_code == 200
+    assert r.json().get("profile_complete") is True
+    assert r.json().get("role") == "admin"
+
+
+def test_registered_user_profile_complete_true(registered_session):
+    s, _ = registered_session
+    r = s.get(f"{API}/auth/me")
+    assert r.status_code == 200
+    assert r.json().get("profile_complete") is True
+
+
+def test_profile_complete_toggles_false_then_true():
+    # Register fresh user to avoid polluting shared session
+    s = requests.Session()
+    email = f"onb_{uuid.uuid4().hex[:6]}@example.com"
+    r = s.post(f"{API}/auth/register", json={
+        "email": email, "password": "secret123", "name": "Onb",
+        "phone": "9876543210", "address": "A", "emergency_contact_name": "C1",
+        "emergency_contact_phone": "9876500000", "age": 25, "blood_type": "O+",
+    })
+    assert r.status_code == 200
+    assert r.json()["profile_complete"] is True
+
+    # Blank out phone + emergency phone -> incomplete
+    r = s.patch(f"{API}/auth/profile", json={"phone": "", "emergency_contact_phone": ""})
+    assert r.status_code == 200
+    assert r.json()["profile_complete"] is False
+    # /auth/me reflects it
+    r = s.get(f"{API}/auth/me")
+    assert r.json()["profile_complete"] is False
+
+    # Fill them back -> complete again
+    r = s.patch(f"{API}/auth/profile", json={"phone": "9876543210", "emergency_contact_phone": "9876500000"})
+    assert r.status_code == 200
+    assert r.json()["profile_complete"] is True
+
+
+# ---- Second emergency contact persistence (registration + profile update) ----
+def test_register_with_two_contacts_and_persist():
+    s = requests.Session()
+    email = f"two_{uuid.uuid4().hex[:6]}@example.com"
+    payload = {
+        "email": email, "password": "secret123", "name": "Two",
+        "phone": "9876543210", "address": "Street",
+        "emergency_contact_name": "Alice", "emergency_contact_phone": "9000000001",
+        "emergency_contact_relation": "Spouse",
+        "emergency_contact2_name": "Bob", "emergency_contact2_phone": "9000000002",
+        "emergency_contact2_relation": "Friend",
+        "age": 30, "blood_type": "A+",
+    }
+    r = s.post(f"{API}/auth/register", json=payload)
+    assert r.status_code == 200, r.text
+    data = r.json()
+    assert data["emergency_contact_name"] == "Alice"
+    assert data["emergency_contact_relation"] == "Spouse"
+    assert data["emergency_contact2_name"] == "Bob"
+    assert data["emergency_contact2_phone"] == "9000000002"
+    assert data["emergency_contact2_relation"] == "Friend"
+    assert data["profile_complete"] is True
+
+    # GET /auth/me verifies persistence
+    r = s.get(f"{API}/auth/me")
+    assert r.status_code == 200
+    me = r.json()
+    assert me["emergency_contact2_name"] == "Bob"
+    assert me["emergency_contact2_relation"] == "Friend"
+
+
+def test_update_emergency_contact2_via_profile(registered_session):
+    s, _ = registered_session
+    r = s.patch(f"{API}/auth/profile", json={
+        "emergency_contact2_name": "Carol",
+        "emergency_contact2_phone": "9000000009",
+        "emergency_contact2_relation": "Sibling",
+    })
+    assert r.status_code == 200
+    assert r.json()["emergency_contact2_name"] == "Carol"
+    assert r.json()["emergency_contact2_relation"] == "Sibling"
+
+    # Verify persistence after re-fetch
+    r = s.get(f"{API}/auth/me")
+    me = r.json()
+    assert me["emergency_contact2_name"] == "Carol"
+    assert me["emergency_contact2_phone"] == "9000000009"
+    assert me["emergency_contact2_relation"] == "Sibling"
+

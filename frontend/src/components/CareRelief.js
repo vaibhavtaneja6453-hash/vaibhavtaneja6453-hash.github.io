@@ -34,6 +34,9 @@ export default function CareRelief({ level, groups, user, s }) {
   const assessList = [...new Set(content.map((c) => c.assess))];
   const remedies = [...new Set(content.flatMap((c) => c.remedies))].slice(0, 6);
   const videos = dedupe(content.flatMap((c) => c.videos)).slice(0, 4);
+  // Breathing/mandala only makes sense for torso, head, back, pelvis — not limbs (biceps, knee, etc.).
+  const CALMING = ["head", "neck", "chest", "abdomen", "lower_back", "upper_back", "pelvis", "buttocks", "general"];
+  const showMandala = keys.some((k) => CALMING.includes(k));
   const [active, setActive] = useState(null);
   const [mandala, setMandala] = useState(0);
   const [phase, setPhase] = useState("Breathe in…");
@@ -146,7 +149,7 @@ export default function CareRelief({ level, groups, user, s }) {
                     allow="accelerated-sensors; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                 ) : (
                   <button onClick={() => setActive(v.id)} className="group w-full h-full" data-testid={`relief-video-play-${v.id}`} aria-label={`Play ${v.title}`}>
-                    <img src={`https://img.youtube.com/vi/${v.id}/hqdefault.jpg`} alt={v.title} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
+                    <img src={`https://img.youtube.com/vi/${v.id}/hqdefault.jpg`} alt={v.title} loading="lazy" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
                     <span className="absolute inset-0 grid place-items-center">
                       <PlayCircle className="w-14 h-14 text-white drop-shadow-lg group-hover:scale-110 transition-transform" />
                     </span>
@@ -159,12 +162,13 @@ export default function CareRelief({ level, groups, user, s }) {
         </div>
       </div>
 
-      {/* Mandala breathing */}
+      {/* Mandala breathing — only for torso/head/back/pelvis, not limbs */}
+      {showMandala && (
       <div className="pm-card p-6 overflow-hidden">
         <div className="flex items-center gap-2 mb-1"><Flower2 className="w-5 h-5 text-pm-secondary" /><h4 className="font-display font-bold text-pm-ink">Breathe with the mandala</h4></div>
         <p className="text-sm text-pm-muted mb-4">Watch the mandala grow and shrink. Breathe in as it expands, out as it shrinks.</p>
         <div className="rounded-3xl py-8 flex flex-col items-center" style={{ background: "radial-gradient(circle at 50% 40%, var(--pm-sel), var(--pm-surface-muted))" }} data-testid="mandala-breathe-section">
-          <img src={MANDALAS[mandala]} alt="Calming mandala" className="mandala-breathe w-56 h-56 sm:w-64 sm:h-64 rounded-full object-cover shadow-xl" />
+          <img src={MANDALAS[mandala]} alt="Calming mandala" loading="lazy" decoding="async" className="mandala-breathe w-56 h-56 sm:w-64 sm:h-64 rounded-full object-cover shadow-xl" />
           <div className="mt-6 flex items-center gap-2 text-pm-ink font-display text-lg font-bold">
             <Wind className="w-5 h-5 text-pm-secondary" /> {phase}
           </div>
@@ -178,6 +182,7 @@ export default function CareRelief({ level, groups, user, s }) {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

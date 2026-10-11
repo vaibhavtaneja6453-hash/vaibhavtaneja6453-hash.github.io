@@ -123,7 +123,7 @@ export default function Diagnostics() {
         <div className="h-full rounded-full transition-all duration-300" style={{ width: `${(step + 1) * 25}%`, background: "linear-gradient(90deg,var(--pm-primary),var(--pm-secondary))" }} />
       </div>
 
-      <motion.div key={step} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+      <motion.div key={step} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
         {step === 0 && (
           <div className="space-y-4">
             <div className="pm-card p-6">
