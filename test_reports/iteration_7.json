@@ -1,0 +1,24 @@
+{
+  "summary": "Pain Map frontend regression (iteration 7) covering mandala gating by region, redesigned onboarding, admin bypass, and RED emergency UI with dual contacts. ALL 5 mandala cases PASS: ua0 (biceps/upper-arm) sev=10 => level=R, Care&Relief shown, mandala-breathe-section ABSENT (correct, upper_arm not in CALMING). kn0 (knee) sev=10 => level=R, mandala ABSENT. chest sev=10 => level=R, mandala PRESENT. head sev=10 => level=R, mandala PRESENT. abd on back view (lower back) sev=10 => level=R, mandala PRESENT. Onboarding redesign: registered fresh user, PATCH /api/auth/profile cleared phone & emergency_contact_phone, reloaded / and app correctly redirected to /onboarding. All 11 required testids present (phone/address/age/blood-type/conditions/emergency 1 name+phone+relation / emergency 2 name+phone+relation / submit). Two-column layout (left gradient aside) visible at 1920 width; progress bar renders with width:25% initial state and animates. Previously filled fields (address, emergency contact 1 name) preserved from registration — only cleared fields need refilling. Submitting valid data navigates to home '/'. Admin login (vaibhavtaneja6453@gmail.com / PainMap@2026) reaches /dashboard directly (bypasses onboarding). RED emergency UI with both contacts set: emergency-call-btn, emergency-whatsapp-btn-0, emergency-sms-btn-0, emergency-whatsapp-btn-1, emergency-sms-btn-1 and emergency-whatsapp-both-btn ALL present; WhatsApp hrefs correctly prefix +91 (wa.me/919876500001 and wa.me/919876500002). Statistics nav label present (2 instances for desktop+mobile menus). AI assistant (floating-ai-assistant-toggle-btn) visible when logged in, HIDDEN after logout (navbar replaced with Login button). Only console messages are 2 benign 401s from /auth/me pre-login probe (expected unauthenticated check). No JS/page errors. Pages load and navigate quickly.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_7.json"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "CareRelief.js CALMING list [head, neck, chest, abdomen, lower_back, upper_back, pelvis, buttocks, general] correctly excludes limb keys (upper_arm, forearm, hand, shoulder, thigh, knee, shin_calf, foot) — verified via live run.",
+    "Onboarding.js uses an inner Inp component defined inside the parent function body (line 45). React will recreate this component on each render; while it works today, a user typing fast could lose focus between keystrokes. Consider moving Inp outside the component or using useCallback/memoization. Not currently causing visible issues in tests.",
+    "Statistics appears twice in the DOM when logged in (desktop nav + user menu). Expected because of responsive menus — note for selector authors to use .first() if asserting single instance."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped per request)", "frontend": "100% on all requested flows (5/5 mandala, onboarding redesign, admin bypass, RED dual contacts, AI widget gating)"},
+  "test_credentials": "Admin: vaibhavtaneja6453@gmail.com / PainMap@2026. Freshly registered testdual<timestamp>@example.com / Testpass1! with 2 emergency contacts (9876500001 Alice, 9876500002 Bob).",
+  "seed_data_creation": "Two throwaway users registered via UI: testuser<ts>@example.com (incomplete profile scenario) and testdual<ts>@example.com (dual-contact RED scenario). No cleanup performed; accounts are random-prefixed.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Diagnostics is a 4-step wizard. Advance steps via data-testid=\"diag-next-btn\" (NOT text match). Severity slider: focus and ArrowRight 15x to reach 10. Mandala gating logic lives in /app/frontend/src/components/CareRelief.js (CALMING constant on line 38). Onboarding redirect driven by AuthContext/ProtectedRoute requiring phone + emergency_contact_phone to be non-empty; simulate incomplete by PATCH /api/auth/profile {phone:'', emergency_contact_phone:''} with include-credentials then navigate to /. For RED dual-contact UI, user must have both emergency_contact_phone AND emergency_contact2_phone set at registration — admin account only has one so testids wa1/sms1 will be absent for admin.",
+  "rca of the issue": "No bugs. All three requested changes verified working: (1) Onboarding redesign renders two-column layout with grouped sections and progress bar at 1920x900; all testids intact. (2) Mandala breathing section correctly hidden for all limb regions (biceps/upper-arm ua0, knee kn0) and shown for torso/head/back (chest, head, lower-back abd-on-back). (3) Flow is fast with only 2 benign 401 console messages (expected pre-auth probe); no JS/page errors on landing, login, register, onboarding, diagnostics 4 steps, dashboard, reviews."
+}

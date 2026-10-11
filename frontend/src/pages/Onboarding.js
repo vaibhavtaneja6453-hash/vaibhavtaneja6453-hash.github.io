@@ -42,17 +42,6 @@ export default function Onboarding() {
     }
   };
 
-  const Inp = ({ label, k, type = "text", placeholder = "", testid, required = true, icon: Icon }) => (
-    <div>
-      <label className="pm-label">{label}</label>
-      <div className="relative">
-        {Icon && <Icon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-pm-muted" />}
-        <input type={type} required={required} value={form[k]} onChange={set(k)} placeholder={placeholder} data-testid={testid}
-          className={`pm-input ${Icon ? "pl-9" : ""}`} {...(type === "number" ? { min: 0, max: 120 } : {})} />
-      </div>
-    </div>
-  );
-
   const step = form.phone && form.address && form.age ? (form.emergency_contact_name && form.emergency_contact_phone ? 100 : 60) : 25;
 
   return (
@@ -93,7 +82,7 @@ export default function Onboarding() {
             <section>
               <h3 className="flex items-center gap-2 font-display font-bold text-pm-ink mb-3"><User className="w-4 h-4 text-pm-secondary" /> Your details</h3>
               <div className="grid sm:grid-cols-2 gap-4">
-                <Inp label="Phone number" k="phone" type="tel" placeholder="90000 00000" testid="onboarding-phone-input" icon={Phone} />
+                <OnbInput label="Phone number" value={form.phone} onChange={set("phone")} type="tel" placeholder="90000 00000" testid="onboarding-phone-input" icon={Phone} />
                 <div>
                   <label className="pm-label">Blood type</label>
                   <div className="relative">
@@ -110,7 +99,7 @@ export default function Onboarding() {
                     <input value={form.address} onChange={set("address")} required placeholder="Street, city, pin code" data-testid="onboarding-address-input" className="pm-input pl-9" />
                   </div>
                 </div>
-                <Inp label="Age" k="age" type="number" placeholder="30" testid="onboarding-age-input" />
+                <OnbInput label="Age" value={form.age} onChange={set("age")} type="number" placeholder="30" testid="onboarding-age-input" />
                 <div>
                   <label className="pm-label">Conditions <span className="text-pm-muted font-normal">(optional)</span></label>
                   <input value={form.conditions} onChange={set("conditions")} placeholder="diabetes, allergies…" data-testid="onboarding-conditions-input" className="pm-input" />
@@ -124,8 +113,8 @@ export default function Onboarding() {
               <div className="pm-card p-4 mb-3" style={{ boxShadow: "none" }}>
                 <p className="text-xs font-bold uppercase tracking-wide text-pm-secondary mb-2">Contact 1 (required)</p>
                 <div className="grid sm:grid-cols-3 gap-3">
-                  <Inp label="Name" k="emergency_contact_name" placeholder="Full name" testid="onboarding-emergency-name-input" />
-                  <Inp label="Phone" k="emergency_contact_phone" type="tel" placeholder="90000 00000" testid="onboarding-emergency-phone-input" />
+                  <OnbInput label="Name" value={form.emergency_contact_name} onChange={set("emergency_contact_name")} placeholder="Full name" testid="onboarding-emergency-name-input" />
+                  <OnbInput label="Phone" value={form.emergency_contact_phone} onChange={set("emergency_contact_phone")} type="tel" placeholder="90000 00000" testid="onboarding-emergency-phone-input" />
                   <div>
                     <label className="pm-label">Relationship</label>
                     <select value={form.emergency_contact_relation} onChange={set("emergency_contact_relation")} data-testid="onboarding-emergency-relation-select" className="pm-input">
@@ -137,8 +126,8 @@ export default function Onboarding() {
               <div className="pm-card p-4" style={{ boxShadow: "none" }}>
                 <p className="text-xs font-bold uppercase tracking-wide text-pm-muted mb-2">Contact 2 (optional)</p>
                 <div className="grid sm:grid-cols-3 gap-3">
-                  <Inp label="Name" k="emergency_contact2_name" placeholder="Full name" testid="onboarding-emergency2-name-input" required={false} />
-                  <Inp label="Phone" k="emergency_contact2_phone" type="tel" placeholder="90000 00000" testid="onboarding-emergency2-phone-input" required={false} />
+                  <OnbInput label="Name" value={form.emergency_contact2_name} onChange={set("emergency_contact2_name")} placeholder="Full name" testid="onboarding-emergency2-name-input" required={false} />
+                  <OnbInput label="Phone" value={form.emergency_contact2_phone} onChange={set("emergency_contact2_phone")} type="tel" placeholder="90000 00000" testid="onboarding-emergency2-phone-input" required={false} />
                   <div>
                     <label className="pm-label">Relationship</label>
                     <select value={form.emergency_contact2_relation} onChange={set("emergency_contact2_relation")} data-testid="onboarding-emergency2-relation-select" className="pm-input">
@@ -158,5 +147,19 @@ export default function Onboarding() {
         </div>
       </div>
     </main>
+  );
+}
+
+
+function OnbInput({ label, value, onChange, type = "text", placeholder = "", testid, required = true, icon: Icon }) {
+  return (
+    <div>
+      <label className="pm-label">{label}</label>
+      <div className="relative">
+        {Icon && <Icon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-pm-muted" />}
+        <input type={type} required={required} value={value} onChange={onChange} placeholder={placeholder} data-testid={testid}
+          className={`pm-input ${Icon ? "pl-9" : ""}`} {...(type === "number" ? { min: 0, max: 120 } : {})} />
+      </div>
+    </div>
   );
 }
