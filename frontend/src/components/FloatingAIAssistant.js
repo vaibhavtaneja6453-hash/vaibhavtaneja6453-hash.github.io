@@ -82,7 +82,7 @@ export default function FloatingAIAssistant() {
           <div ref={bodyRef} className="flex-1 overflow-auto p-3 flex flex-col gap-2.5" style={{ background: "var(--pm-bg)" }}>
             {messages.map((m, i) => (
               <div
-                key={i}
+                key={`${m.role}-${i}`}
                 className={`max-w-[88%] px-3.5 py-2.5 rounded-2xl text-[15px] leading-snug whitespace-pre-line ${
                   m.role === "user" ? "self-end text-white" : "self-start"
                 }`}

@@ -190,13 +190,13 @@ export default function Diagnostics() {
           <div className="space-y-4">
             <div className="rounded-3xl p-6 text-white shadow-lg" style={{ background: { G: "linear-gradient(135deg,#0f8a6a,#27b58c)", Y: "linear-gradient(135deg,#a87800,#d49a00)", R: "linear-gradient(135deg,#c0283a,#e5535f)" }[result.lvl] }} data-testid="diag-result-banner" data-level={result.lvl}>
               <div className="flex items-center gap-2 mb-2"><Activity className="w-6 h-6" /><h2 className="font-display text-2xl font-bold">{LEVEL_FULL[result.lvl]}</h2></div>
-              {result.why.map((w, i) => <p key={i} className="text-[15px] opacity-95 mt-1">• {w}</p>)}
+              {result.why.map((w, i) => <p key={`why-${w}`} className="text-[15px] opacity-95 mt-1">• {w}</p>)}
             </div>
             {result.lvl !== "G" && <CareRelief level={result.lvl} groups={groups(s.regions)} user={user} s={s} />}
             <div className="pm-card p-6">
               <h3 className="font-display text-lg font-bold text-pm-ink">What this could mean</h3>
               <p className="text-sm text-pm-muted">Possible patterns only, not a diagnosis.</p>
-              <ul className="list-disc pl-5 mt-3 space-y-1 text-pm-ink">{result.pat.map((p, i) => <li key={i}>{p}</li>)}</ul>
+              <ul className="list-disc pl-5 mt-3 space-y-1 text-pm-ink">{result.pat.map((p) => <li key={`pat-${p}`}>{p}</li>)}</ul>
               <h3 className="font-display text-lg font-bold text-pm-ink mt-5">Next step</h3>
               <p className="text-pm-ink mt-1">{result.next}</p>
             </div>

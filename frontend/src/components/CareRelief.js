@@ -84,7 +84,7 @@ export default function CareRelief({ level, groups, user, s }) {
           {contacts.length > 0 && (
             <div className="grid sm:grid-cols-2 gap-3 mt-3">
               {contacts.map((c, i) => (
-                <div key={i} className="p-3 rounded-xl" style={{ background: "var(--pm-surface-muted)" }} data-testid={`emergency-contact-${i}`}>
+                <div key={`contact-${c.phone || c.name || i}`} className="p-3 rounded-xl" style={{ background: "var(--pm-surface-muted)" }} data-testid={`emergency-contact-${i}`}>
                   <p className="font-bold text-pm-ink text-sm">{c.name || "Emergency contact"} <span className="text-pm-muted font-normal">· {c.relation || "contact"}</span></p>
                   <div className="flex gap-2 mt-2">
                     <a href={waUrl(c)} target="_blank" rel="noopener noreferrer" data-testid={`emergency-whatsapp-btn-${i}`} className="pm-btn-alt flex-1 !min-h-[42px] !py-2" style={{ borderColor: "#25D366", color: "#1c9e4f" }}>
@@ -101,7 +101,7 @@ export default function CareRelief({ level, groups, user, s }) {
           <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--pm-border)" }}>
             <p className="text-sm font-bold text-pm-ink mb-1">While you wait for help</p>
             <ul className="space-y-1">
-              {RED_WAIT_TIPS.map((t, i) => <li key={i} className="text-sm text-pm-muted">• {t}</li>)}
+              {RED_WAIT_TIPS.map((t) => <li key={t} className="text-sm text-pm-muted">• {t}</li>)}
             </ul>
           </div>
         </motion.div>
@@ -121,7 +121,7 @@ export default function CareRelief({ level, groups, user, s }) {
 
         <div className="mt-4 p-3.5 rounded-xl" style={{ background: "var(--pm-sel)" }} data-testid="care-assessment">
           <div className="flex items-center gap-1.5 mb-1"><Stethoscope className="w-4 h-4 text-pm-secondary" /><p className="font-bold text-pm-ink text-sm">Assessing your pain</p></div>
-          {assessList.map((a, i) => <p key={i} className="text-sm text-pm-ink">• {a}</p>)}
+          {assessList.map((a) => <p key={a} className="text-sm text-pm-ink">• {a}</p>)}
         </div>
 
         {/* Home remedies */}
@@ -129,7 +129,7 @@ export default function CareRelief({ level, groups, user, s }) {
           <div className="flex items-center gap-2 mb-2"><Leaf className="w-4 h-4 text-pm-secondary" /><h4 className="font-display font-bold text-pm-ink">Home remedies for this area</h4></div>
           <div className="grid sm:grid-cols-2 gap-2.5">
             {remedies.map((r, i) => (
-              <div key={i} className="flex gap-2.5 p-3 rounded-xl text-sm text-pm-ink" style={{ background: "var(--pm-surface-muted)" }} data-testid={`home-remedy-${i}`}>
+              <div key={`remedy-${r}`} className="flex gap-2.5 p-3 rounded-xl text-sm text-pm-ink" style={{ background: "var(--pm-surface-muted)" }} data-testid={`home-remedy-${i}`}>
                 <span className="mt-0.5 text-pm-secondary">✓</span>{r}
               </div>
             ))}
@@ -174,7 +174,7 @@ export default function CareRelief({ level, groups, user, s }) {
           </div>
           <div className="flex gap-2 mt-5">
             {MANDALAS.map((m, i) => (
-              <button key={i} onClick={() => setMandala(i)} data-testid={`mandala-thumb-${i}`} aria-label={`Mandala ${i + 1}`}
+              <button key={`mandala-${m}`} onClick={() => setMandala(i)} data-testid={`mandala-thumb-${i}`} aria-label={`Mandala ${i + 1}`}
                 className="w-12 h-12 rounded-full overflow-hidden border-2 transition-all" style={{ borderColor: mandala === i ? "var(--pm-secondary)" : "transparent", opacity: mandala === i ? 1 : 0.6 }}>
                 <img src={m} alt="" className="w-full h-full object-cover" />
               </button>

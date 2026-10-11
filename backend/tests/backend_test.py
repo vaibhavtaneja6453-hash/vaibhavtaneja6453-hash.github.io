@@ -8,8 +8,8 @@ import pytest
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://health-dashboard-hub.preview.emergentagent.com").rstrip("/")
 API = f"{BASE_URL}/api"
 
-ADMIN_EMAIL = "vaibhavtaneja6453@gmail.com"
-ADMIN_PASSWORD = "PainMap@2026"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "vaibhavtaneja6453@gmail.com")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 
 @pytest.fixture(scope="session")
@@ -104,8 +104,8 @@ def test_auth_providers_endpoint():
     assert r.status_code == 200
     data = r.json()
     # Google env may or may not be configured; facebook & microsoft must be False (envs empty)
-    assert data.get("facebook") is False
-    assert data.get("microsoft") is False
+    assert data.get("facebook") == False
+    assert data.get("microsoft") == False
     assert "google" in data
 
 
@@ -296,7 +296,7 @@ def test_logout_clears_session(registered_session):
 def test_admin_profile_complete_true(admin_session):
     r = admin_session.get(f"{API}/auth/me")
     assert r.status_code == 200
-    assert r.json().get("profile_complete") is True
+    assert r.json().get("profile_complete") == True
     assert r.json().get("role") == "admin"
 
 
@@ -304,7 +304,7 @@ def test_registered_user_profile_complete_true(registered_session):
     s, _ = registered_session
     r = s.get(f"{API}/auth/me")
     assert r.status_code == 200
-    assert r.json().get("profile_complete") is True
+    assert r.json().get("profile_complete") == True
 
 
 def test_profile_complete_toggles_false_then_true():
@@ -317,20 +317,20 @@ def test_profile_complete_toggles_false_then_true():
         "emergency_contact_phone": "9876500000", "age": 25, "blood_type": "O+",
     })
     assert r.status_code == 200
-    assert r.json()["profile_complete"] is True
+    assert r.json()["profile_complete"] == True
 
     # Blank out phone + emergency phone -> incomplete
     r = s.patch(f"{API}/auth/profile", json={"phone": "", "emergency_contact_phone": ""})
     assert r.status_code == 200
-    assert r.json()["profile_complete"] is False
+    assert r.json()["profile_complete"] == False
     # /auth/me reflects it
     r = s.get(f"{API}/auth/me")
-    assert r.json()["profile_complete"] is False
+    assert r.json()["profile_complete"] == False
 
     # Fill them back -> complete again
     r = s.patch(f"{API}/auth/profile", json={"phone": "9876543210", "emergency_contact_phone": "9876500000"})
     assert r.status_code == 200
-    assert r.json()["profile_complete"] is True
+    assert r.json()["profile_complete"] == True
 
 
 # ---- Second emergency contact persistence (registration + profile update) ----
@@ -354,7 +354,7 @@ def test_register_with_two_contacts_and_persist():
     assert data["emergency_contact2_name"] == "Bob"
     assert data["emergency_contact2_phone"] == "9000000002"
     assert data["emergency_contact2_relation"] == "Friend"
-    assert data["profile_complete"] is True
+    assert data["profile_complete"] == True
 
     # GET /auth/me verifies persistence
     r = s.get(f"{API}/auth/me")
