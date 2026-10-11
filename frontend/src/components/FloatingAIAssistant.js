@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 import { MessageCircle, X, Send, Sparkles } from "lucide-react";
 
 const QUICK = ["How do I use this?", "What do the colours mean?", "Is my data safe?", "Explain pain severity", "Emergency help"];
 
 export default function FloatingAIAssistant() {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -37,6 +39,8 @@ export default function FloatingAIAssistant() {
       setBusy(false);
     }
   };
+
+  if (!user) return null;
 
   return (
     <>

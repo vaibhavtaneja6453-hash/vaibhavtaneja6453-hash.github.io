@@ -86,7 +86,7 @@ async def create_session(user_id: str) -> str:
 def set_session_cookie(response: Response, token: str):
     response.set_cookie(
         key="session_token", value=token, httponly=True, secure=True,
-        samesite="none", max_age=SESSION_DAYS * 24 * 3600, path="/",
+        samesite="lax", max_age=SESSION_DAYS * 24 * 3600, path="/",
     )
 
 
@@ -282,6 +282,12 @@ async def logout(request: Request, response: Response):
 @api_router.patch("/auth/profile")
 async def update_profile(payload: ProfileUpdate, user: dict = Depends(get_current_user)):
     updates = {k: v for k, v in payload.model_dump().items() if v is not None}
+    pic = updates.get("picture")
+    if pic:
+        if len(pic) > 3_000_000:
+            raise HTTPException(status_code=400, detail="Image too large (max ~2MB)")
+        if not pic.startswith(("data:image/", "http://", "https://")):
+            raise HTTPException(status_code=400, detail="Invalid image format")
     if updates:
         await db.users.update_one({"user_id": user["user_id"]}, {"$set": updates})
         user = await db.users.find_one({"user_id": user["user_id"]}, {"_id": 0})
@@ -317,7 +323,12 @@ async def _social_login(email, name, picture, provider, sub, response):
     if sub:
         user = await db.users.find_one({f"oauth_{provider}": sub})
     if not user and email:
-        user = await db.users.find_one({"email": email})
+        existing = await db.users.find_one({"email": email})
+        if existing:
+            # Refuse silent takeover of a password account via an unverified provider email.
+            if existing.get("password_hash") and not existing.get(f"oauth_{provider}"):
+                return False
+            user = existing
     if not user:
         user = {
             "user_id": f"user_{uuid.uuid4().hex[:12]}", "email": email, "name": name or "",
@@ -334,10 +345,11 @@ async def _social_login(email, name, picture, provider, sub, response):
         await db.users.update_one({"user_id": user["user_id"]}, {"$set": upd})
     token = await create_session(user["user_id"])
     set_session_cookie(response, token)
+    return True
 
 
 def _state_cookie(resp, state):
-    resp.set_cookie("oauth_state", state, max_age=600, httponly=True, secure=True, samesite="none", path="/")
+    resp.set_cookie("oauth_state", state, max_age=600, httponly=True, secure=True, samesite="lax", path="/")
 
 
 @api_router.get("/auth/facebook")
@@ -368,7 +380,9 @@ async def facebook_callback(request: Request, code: str = None, state: str = Non
     p = prof.json()
     pic = (p.get("picture") or {}).get("data", {}).get("url", "")
     resp = RedirectResponse(f"{FRONTEND_URL}/dashboard")
-    await _social_login(p.get("email"), p.get("name"), pic, "facebook", p.get("id"), resp)
+    ok = await _social_login(p.get("email"), p.get("name"), pic, "facebook", p.get("id"), resp)
+    if not ok:
+        return RedirectResponse(f"{FRONTEND_URL}/login?error=link_facebook")
     resp.delete_cookie("oauth_state", path="/")
     return resp
 
@@ -403,7 +417,9 @@ async def microsoft_callback(request: Request, code: str = None, state: str = No
         info = await c.get("https://graph.microsoft.com/oidc/userinfo", headers={"Authorization": f"Bearer {at}"})
     p = info.json()
     resp = RedirectResponse(f"{FRONTEND_URL}/dashboard")
-    await _social_login(p.get("email") or p.get("preferred_username"), p.get("name"), "", "microsoft", p.get("sub"), resp)
+    ok = await _social_login(p.get("email") or p.get("preferred_username"), p.get("name"), "", "microsoft", p.get("sub"), resp)
+    if not ok:
+        return RedirectResponse(f"{FRONTEND_URL}/login?error=link_microsoft")
     resp.delete_cookie("oauth_state", path="/")
     return resp
 
@@ -525,7 +541,11 @@ SYSTEM_PROMPT = (
 
 
 @api_router.post("/assistant/chat")
-async def assistant_chat(payload: ChatIn):
+async def assistant_chat(payload: ChatIn, user: dict = Depends(get_current_user)):
+    if len(payload.messages) > 30:
+        raise HTTPException(status_code=400, detail="Too many messages in this conversation")
+    if any(len(m.content) > 4000 for m in payload.messages):
+        raise HTTPException(status_code=400, detail="Message is too long")
     from emergentintegrations.llm.chat import LlmChat, UserMessage
 
     history = payload.messages[:-1] if payload.messages else []
@@ -614,9 +634,8 @@ async def on_startup():
                 "picture": "", "role": "admin", "auth_provider": "password",
                 "created_at": now_utc(),
             })
-        elif not verify_password(admin_password, existing.get("password_hash", "")):
-            await db.users.update_one({"email": admin_email},
-                                      {"$set": {"password_hash": hash_password(admin_password), "role": "admin"}})
+        elif existing.get("role") != "admin":
+            await db.users.update_one({"email": admin_email}, {"$set": {"role": "admin"}})
 
     await db.reviews.delete_many({"user_id": "seed"})
     base = now_utc()

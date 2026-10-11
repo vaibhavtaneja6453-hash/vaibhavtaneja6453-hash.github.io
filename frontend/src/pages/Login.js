@@ -18,7 +18,8 @@ export default function Login() {
   useEffect(() => {
     api.get("/auth/providers").then(({ data }) => setProviders(data)).catch(() => {});
     const err = new URLSearchParams(window.location.search).get("error");
-    if (err) toast.error(`${err === "facebook" ? "Facebook" : "Microsoft"} sign-in failed. Please try again.`);
+    if (err === "facebook" || err === "microsoft") toast.error(`${err === "facebook" ? "Facebook" : "Microsoft"} sign-in failed. Please try again.`);
+    else if (err && err.startsWith("link_")) toast.error("This email already has a password account. Please log in with your password first.");
   }, []);
 
   const submit = async (e) => {
