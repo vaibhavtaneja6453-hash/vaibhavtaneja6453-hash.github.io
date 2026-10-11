@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { formatApiError } from "../lib/api";
-import { BLOOD_TYPES } from "../lib/painEngine";
+import { BLOOD_TYPES, RELATIONS } from "../lib/painEngine";
 import { Camera, Save, Mail, ShieldCheck } from "lucide-react";
 
 export default function Profile() {
@@ -12,6 +12,10 @@ export default function Profile() {
     name: user?.name || "", phone: user?.phone || "", address: user?.address || "",
     emergency_contact_name: user?.emergency_contact_name || "",
     emergency_contact_phone: user?.emergency_contact_phone || "",
+    emergency_contact_relation: user?.emergency_contact_relation || "Spouse",
+    emergency_contact2_name: user?.emergency_contact2_name || "",
+    emergency_contact2_phone: user?.emergency_contact2_phone || "",
+    emergency_contact2_relation: user?.emergency_contact2_relation || "Friend",
     age: user?.age ?? "", blood_type: user?.blood_type || "O+",
     conditions: user?.conditions || "", picture: user?.picture || "",
   });
@@ -87,8 +91,22 @@ export default function Profile() {
             <label className="pm-label">Address</label>
             <input value={form.address} onChange={set("address")} className="pm-input" data-testid="profile-address-input" />
           </div>
-          <Field label="Emergency contact name" k="emergency_contact_name" v={form.emergency_contact_name} on={set} t="profile-emergency-name-input" />
-          <Field label="Emergency contact phone" k="emergency_contact_phone" v={form.emergency_contact_phone} on={set} t="profile-emergency-phone-input" type="tel" />
+          <Field label="Emergency contact 1 name" k="emergency_contact_name" v={form.emergency_contact_name} on={set} t="profile-emergency-name-input" />
+          <Field label="Emergency contact 1 phone" k="emergency_contact_phone" v={form.emergency_contact_phone} on={set} t="profile-emergency-phone-input" type="tel" />
+          <div>
+            <label className="pm-label">Contact 1 relationship</label>
+            <select value={form.emergency_contact_relation} onChange={set("emergency_contact_relation")} className="pm-input" data-testid="profile-emergency-relation-select">
+              {RELATIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+          <Field label="Emergency contact 2 name" k="emergency_contact2_name" v={form.emergency_contact2_name} on={set} t="profile-emergency2-name-input" />
+          <Field label="Emergency contact 2 phone" k="emergency_contact2_phone" v={form.emergency_contact2_phone} on={set} t="profile-emergency2-phone-input" type="tel" />
+          <div>
+            <label className="pm-label">Contact 2 relationship</label>
+            <select value={form.emergency_contact2_relation} onChange={set("emergency_contact2_relation")} className="pm-input" data-testid="profile-emergency2-relation-select">
+              {RELATIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
           <Field label="Age" k="age" v={form.age} on={set} t="profile-age-input" type="number" />
           <div>
             <label className="pm-label">Blood type</label>

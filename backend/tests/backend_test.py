@@ -200,15 +200,76 @@ def test_create_review_logged_in(registered_session):
     assert any(x.get("id") == doc["id"] for x in r.json())
 
 
-# ---- Assistant ----
-def test_assistant_chat():
+# ---- Assistant (now auth-gated) ----
+def test_assistant_chat_requires_auth():
     r = requests.post(f"{API}/assistant/chat", json={
+        "messages": [{"role": "user", "content": "hi"}],
+        "context": ""
+    }, timeout=30)
+    assert r.status_code == 401
+
+
+def test_assistant_chat_logged_in(registered_session):
+    s, _ = registered_session
+    r = s.post(f"{API}/assistant/chat", json={
         "messages": [{"role": "user", "content": "What does severity 7 mean?"}],
         "context": ""
     }, timeout=60)
     assert r.status_code == 200
     assert "text" in r.json()
     assert len(r.json()["text"]) > 0
+
+
+def test_assistant_chat_too_many_messages(registered_session):
+    s, _ = registered_session
+    msgs = [{"role": "user", "content": f"msg {i}"} for i in range(31)]
+    r = s.post(f"{API}/assistant/chat", json={"messages": msgs, "context": ""}, timeout=30)
+    assert r.status_code == 400
+
+
+def test_assistant_chat_message_too_long(registered_session):
+    s, _ = registered_session
+    r = s.post(f"{API}/assistant/chat", json={
+        "messages": [{"role": "user", "content": "x" * 4001}], "context": ""
+    }, timeout=30)
+    assert r.status_code == 400
+
+
+# ---- Profile picture validation ----
+def test_profile_picture_invalid_scheme(registered_session):
+    s, _ = registered_session
+    r = s.patch(f"{API}/auth/profile", json={"picture": "javascript:alert(1)"})
+    assert r.status_code == 400
+
+
+def test_profile_picture_too_large(registered_session):
+    s, _ = registered_session
+    big = "data:image/png;base64," + ("A" * 3_000_001)
+    r = s.patch(f"{API}/auth/profile", json={"picture": big})
+    assert r.status_code == 400
+
+
+def test_profile_picture_valid_data_url(registered_session):
+    s, _ = registered_session
+    small = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+    r = s.patch(f"{API}/auth/profile", json={"picture": small})
+    assert r.status_code == 200
+    assert r.json()["picture"] == small
+
+
+# ---- Session cookie regression: must set httponly session_token and session works ----
+def test_login_sets_session_cookie_and_works():
+    s = requests.Session()
+    r = s.post(f"{API}/auth/login", json={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD})
+    assert r.status_code == 200
+    set_cookie = r.headers.get("set-cookie", "")
+    assert "session_token=" in set_cookie
+    assert "httponly" in set_cookie.lower()
+    # Session persists across requests (page navigation / reload regression)
+    me = s.get(f"{API}/auth/me")
+    assert me.status_code == 200
+    assert me.json()["email"] == ADMIN_EMAIL
+    # Note: public ingress may rewrite SameSite to None;Partitioned; backend code uses Lax (same-origin app)
 
 
 # ---- Logout ----

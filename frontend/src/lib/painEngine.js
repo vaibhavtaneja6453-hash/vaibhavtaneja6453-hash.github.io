@@ -6,6 +6,7 @@ export const PAT = ["Constant", "Comes and goes", "Getting worse", "Getting bett
 export const TRIG = ["Movement", "Resting", "Eating", "Breathing in", "Cough / sneeze", "Stress", "Lifting / injury", "Nothing obvious", "I don't know"];
 export const REL = ["Fever", "Nausea / vomiting", "Shortness of breath", "Sweating", "Dizziness / fainting", "Numbness / tingling", "Weakness", "Swelling", "Redness / warmth", "Vision changes", "Confusion", "Stiff neck", "Pain spreading to arm / jaw", "Recent injury", "None of these"];
 export const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-", "Unknown"];
+export const RELATIONS = ["Spouse", "Parent", "Child", "Sibling", "Friend", "Relative", "Doctor", "Neighbour", "Other"];
 
 // region: [key, front name, back name, shape(e/r), x, y, w, h, pair?]
 export const R = [

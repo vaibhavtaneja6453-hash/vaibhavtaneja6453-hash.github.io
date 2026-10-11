@@ -3,12 +3,13 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { api, API, formatApiError } from "../lib/api";
-import { BLOOD_TYPES } from "../lib/painEngine";
+import { BLOOD_TYPES, RELATIONS } from "../lib/painEngine";
 import { HeartPulse, ArrowRight } from "lucide-react";
 
 const initial = {
   name: "", email: "", phone: "", address: "",
-  emergency_contact_name: "", emergency_contact_phone: "",
+  emergency_contact_name: "", emergency_contact_phone: "", emergency_contact_relation: "Spouse",
+  emergency_contact2_name: "", emergency_contact2_phone: "", emergency_contact2_relation: "Friend",
   password: "", age: "", blood_type: "O+", conditions: "",
 };
 
@@ -103,8 +104,22 @@ export default function Register() {
             <label className="pm-label">Address</label>
             <input value={form.address} onChange={set("address")} required placeholder="Street, city, pin code" data-testid="register-address-input" className="pm-input" />
           </div>
-          {field("Emergency contact name", "emergency_contact_name", "text", "Contact person", "register-emergency-contact-input")}
-          {field("Emergency contact phone", "emergency_contact_phone", "tel", "+91 90000 00000", "register-emergency-phone-input")}
+          {field("Emergency contact 1 name", "emergency_contact_name", "text", "Contact person", "register-emergency-contact-input")}
+          {field("Emergency contact 1 phone", "emergency_contact_phone", "tel", "90000 00000", "register-emergency-phone-input")}
+          <div className="sm:col-span-2">
+            <label className="pm-label">Contact 1 relationship</label>
+            <select value={form.emergency_contact_relation} onChange={set("emergency_contact_relation")} data-testid="register-emergency-relation-select" className="pm-input">
+              {RELATIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+          {field("Emergency contact 2 name (optional)", "emergency_contact2_name", "text", "Second contact", "register-emergency2-contact-input", false)}
+          {field("Emergency contact 2 phone (optional)", "emergency_contact2_phone", "tel", "90000 00000", "register-emergency2-phone-input", false)}
+          <div className="sm:col-span-2">
+            <label className="pm-label">Contact 2 relationship</label>
+            <select value={form.emergency_contact2_relation} onChange={set("emergency_contact2_relation")} data-testid="register-emergency2-relation-select" className="pm-input">
+              {RELATIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
           {field("Age", "age", "number", "30", "register-age-input")}
           {field("Password", "password", "password", "At least 6 characters", "register-password-input")}
           <div className="sm:col-span-2">

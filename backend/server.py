@@ -55,6 +55,11 @@ def now_utc() -> datetime:
 
 
 def public_user(doc: dict) -> dict:
+    role = doc.get("role", "patient")
+    complete = role == "admin" or bool(
+        doc.get("phone") and doc.get("address") and doc.get("blood_type")
+        and doc.get("age") and doc.get("emergency_contact_name") and doc.get("emergency_contact_phone")
+    )
     return {
         "user_id": doc.get("user_id"),
         "email": doc.get("email"),
@@ -63,12 +68,17 @@ def public_user(doc: dict) -> dict:
         "address": doc.get("address"),
         "emergency_contact_name": doc.get("emergency_contact_name"),
         "emergency_contact_phone": doc.get("emergency_contact_phone"),
+        "emergency_contact_relation": doc.get("emergency_contact_relation"),
+        "emergency_contact2_name": doc.get("emergency_contact2_name"),
+        "emergency_contact2_phone": doc.get("emergency_contact2_phone"),
+        "emergency_contact2_relation": doc.get("emergency_contact2_relation"),
         "age": doc.get("age"),
         "blood_type": doc.get("blood_type"),
         "conditions": doc.get("conditions"),
         "picture": doc.get("picture"),
-        "role": doc.get("role", "patient"),
+        "role": role,
         "auth_provider": doc.get("auth_provider", "password"),
+        "profile_complete": complete,
     }
 
 
@@ -125,6 +135,10 @@ class RegisterIn(BaseModel):
     address: str
     emergency_contact_name: str
     emergency_contact_phone: str
+    emergency_contact_relation: Optional[str] = ""
+    emergency_contact2_name: Optional[str] = ""
+    emergency_contact2_phone: Optional[str] = ""
+    emergency_contact2_relation: Optional[str] = ""
     age: int
     blood_type: str
     conditions: Optional[str] = ""
@@ -141,6 +155,10 @@ class ProfileUpdate(BaseModel):
     address: Optional[str] = None
     emergency_contact_name: Optional[str] = None
     emergency_contact_phone: Optional[str] = None
+    emergency_contact_relation: Optional[str] = None
+    emergency_contact2_name: Optional[str] = None
+    emergency_contact2_phone: Optional[str] = None
+    emergency_contact2_relation: Optional[str] = None
     age: Optional[int] = None
     blood_type: Optional[str] = None
     conditions: Optional[str] = None
@@ -199,6 +217,10 @@ async def register(payload: RegisterIn, response: Response):
         "address": payload.address,
         "emergency_contact_name": payload.emergency_contact_name,
         "emergency_contact_phone": payload.emergency_contact_phone,
+        "emergency_contact_relation": payload.emergency_contact_relation or "",
+        "emergency_contact2_name": payload.emergency_contact2_name or "",
+        "emergency_contact2_phone": payload.emergency_contact2_phone or "",
+        "emergency_contact2_relation": payload.emergency_contact2_relation or "",
         "age": payload.age,
         "blood_type": payload.blood_type,
         "conditions": payload.conditions or "",

@@ -4,21 +4,23 @@ import { motion } from "framer-motion";
 import { REGION_CONTENT, regionKeys, MANDALAS, RED_WAIT_TIPS } from "../lib/careContent";
 import { Leaf, PlayCircle, Flower2, PhoneCall, MessageCircle, Siren, HeartPulse, Wind, Send, Stethoscope } from "lucide-react";
 
-function buildWaLink(user, s) {
-  let digits = (user?.emergency_contact_phone || "").replace(/[^0-9]/g, "");
-  // Normalise to a dialable international number (default India +91 when no country code given).
-  if (digits.startsWith("0")) digits = digits.replace(/^0+/, "");
-  if (digits.length === 10) digits = "91" + digits;
-  const valid = digits.length >= 11;
+function normPhone(raw) {
+  let d = (raw || "").replace(/[^0-9]/g, "");
+  if (d.startsWith("0")) d = d.replace(/^0+/, "");
+  if (d.length === 10) d = "91" + d;
+  return d.length >= 11 ? d : "";
+}
+
+function buildMessage(user, s) {
   const name = user?.name || "Someone I know";
   const regions = (s.regions || []).join(", ") || "unspecified area";
   const symptoms = (s.rel || []).filter((x) => !x.startsWith("None")).join(", ");
-  const msg =
+  return (
     `🚨 Pain Map emergency alert: ${name} may need urgent help right now. ` +
     `A serious (RED) situation was flagged — pain in ${regions}, severity ${s.sev}/10` +
     (symptoms ? `, symptoms: ${symptoms}` : "") +
-    `. Please reach them or call emergency services immediately. (Automated alert — not a medical diagnosis.)`;
-  return { digits: valid ? digits : "", url: `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`, msg };
+    `. Please reach them or call emergency services immediately. (Automated alert — not a medical diagnosis.)`
+  );
 }
 
 function dedupe(videos) {
@@ -42,7 +44,13 @@ export default function CareRelief({ level, groups, user, s }) {
   }, []);
 
   const isRed = level === "R";
-  const wa = buildWaLink(user, s);
+  const alertMsg = buildMessage(user, s);
+  const contacts = [
+    { name: user?.emergency_contact_name, relation: user?.emergency_contact_relation, phone: normPhone(user?.emergency_contact_phone) },
+    { name: user?.emergency_contact2_name, relation: user?.emergency_contact2_relation, phone: normPhone(user?.emergency_contact2_phone) },
+  ].filter((c) => c.phone);
+  const waUrl = (c) => `https://wa.me/${c.phone}?text=${encodeURIComponent(alertMsg)}`;
+  const smsUrl = (c) => `sms:${c.phone}?body=${encodeURIComponent(alertMsg)}`;
 
   return (
     <div className="space-y-4" data-testid="care-relief-section">
@@ -59,21 +67,34 @@ export default function CareRelief({ level, groups, user, s }) {
             <a href="tel:112" data-testid="emergency-call-btn" className="pm-btn" style={{ background: "var(--pm-red)", boxShadow: "none" }}>
               <PhoneCall className="w-5 h-5" /> Call emergency (112)
             </a>
-            {wa.digits ? (
-              <a href={wa.url} target="_blank" rel="noopener noreferrer" data-testid="emergency-whatsapp-btn" className="pm-btn-alt" style={{ borderColor: "#25D366", color: "#1c9e4f" }}>
-                <MessageCircle className="w-5 h-5" /> Alert {user?.emergency_contact_name || "my contact"} on WhatsApp
-              </a>
-            ) : (
+            {contacts.length === 0 && (
               <Link to="/profile" data-testid="emergency-add-contact-link" className="pm-btn-alt">
                 <MessageCircle className="w-5 h-5" /> Add an emergency contact
               </Link>
             )}
-            {wa.digits && (
-              <a href={`sms:${wa.digits}?body=${encodeURIComponent(wa.msg)}`} data-testid="emergency-sms-btn" className="pm-btn-alt">
-                <Send className="w-5 h-5" /> Send SMS alert
-              </a>
+            {contacts.length >= 2 && (
+              <button type="button" onClick={() => contacts.forEach((c) => window.open(waUrl(c), "_blank"))} data-testid="emergency-whatsapp-both-btn" className="pm-btn-alt" style={{ borderColor: "#25D366", color: "#1c9e4f" }}>
+                <MessageCircle className="w-5 h-5" /> Alert both on WhatsApp
+              </button>
             )}
           </div>
+          {contacts.length > 0 && (
+            <div className="grid sm:grid-cols-2 gap-3 mt-3">
+              {contacts.map((c, i) => (
+                <div key={i} className="p-3 rounded-xl" style={{ background: "var(--pm-surface-muted)" }} data-testid={`emergency-contact-${i}`}>
+                  <p className="font-bold text-pm-ink text-sm">{c.name || "Emergency contact"} <span className="text-pm-muted font-normal">· {c.relation || "contact"}</span></p>
+                  <div className="flex gap-2 mt-2">
+                    <a href={waUrl(c)} target="_blank" rel="noopener noreferrer" data-testid={`emergency-whatsapp-btn-${i}`} className="pm-btn-alt flex-1 !min-h-[42px] !py-2" style={{ borderColor: "#25D366", color: "#1c9e4f" }}>
+                      <MessageCircle className="w-4 h-4" /> WhatsApp
+                    </a>
+                    <a href={smsUrl(c)} data-testid={`emergency-sms-btn-${i}`} className="pm-btn-alt flex-1 !min-h-[42px] !py-2">
+                      <Send className="w-4 h-4" /> SMS
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--pm-border)" }}>
             <p className="text-sm font-bold text-pm-ink mb-1">While you wait for help</p>
             <ul className="space-y-1">

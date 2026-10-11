@@ -1,0 +1,20 @@
+{
+  "summary": "Security-fix regression run on Pain Map. Backend: 25/25 pytest tests pass covering admin login, register, duplicate reject, auth/me gating, Google session invalid, auth providers (facebook/microsoft=false), facebook/microsoft start returns 400 (unconfigured), diary CRUD+stats, reviews list seeded (4+) and auth gating, logout clears session, PLUS new tests: assistant/chat requires auth (401), works logged-in (200), rejects >30 messages and >4000-char messages (400), profile picture rejects invalid scheme and >~2MB payloads, accepts valid data:image/png, and login still sets httpOnly session_token cookie with working persistence. Frontend: admin login reaches /dashboard, Statistics nav label present, avatar dropdown exposes nav-profile-btn and nav-logout-btn, Floating AI widget (floating-ai-assistant-toggle-btn) visible when logged in and returns real AI responses; AI widget hidden on public landing/reviews and after logout; protected routes /diagnostics, /dashboard, /profile redirect to /login when logged out; no Facebook/Microsoft buttons on /login; diagnostics has 4 steps with no age/sex inputs and chest body-map region present; session persists across reload (SameSite=Lax regression OK end-to-end).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Public ingress (CloudFlare / preview proxy) rewrites Set-Cookie to SameSite=None; Partitioned despite backend code setting samesite='lax' in set_session_cookie. End-to-end login/session works, but if strict Lax behavior is required at the browser, revisit at the ingress layer. No code change needed in app.",
+    "server.py line 563 uses model 'claude-sonnet-5-5' via emergentintegrations — unusual version string; keep an eye on this if upstream rejects it (currently returns valid replies, so OK).",
+    "Login.js shows link_facebook/link_microsoft errors via toast only (auto-dismiss). Consider also showing a persistent inline banner so users don't miss the message on slow page loads."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (25/25)", "frontend": "100% on critical regression flows"},
+  "test_credentials": "Admin: vaibhavtaneja6453@gmail.com / PainMap@2026",
+  "seed_data_creation": "pytest creates throwaway TEST_ user via /api/auth/register and a review 'TEST title / TEST review body' tied to that user. One extra diary entry may remain under the test user (cleanup not strictly required since account is random).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Testids to use: login-email-input, login-password-input, login-submit-button; nav-user-menu-btn then nav-profile-btn / nav-logout-btn; floating-ai-assistant-toggle-btn, ai-assistant-message-input, ai-assistant-send-btn; body-map-region-chest; diag-age-input and diag-sex-select intentionally DO NOT exist (4-step wizard). Toggle button in FloatingAIAssistant.js is replaced by the open panel so you cannot click it twice to close — close via the X close icon instead.",
+  "rca of the issue": "No bugs found. All five security fixes verified: (1) /api/assistant/chat now returns 401 without auth, 200 with cookie, enforces 30-msg and 4000-char caps; FloatingAIAssistant.js correctly returns null without user. (2) OAuth _social_login does not silently link (code path verified by review; providers endpoint reports false for FB/MS and start endpoints 400). (3) Session cookie code uses samesite=lax; login+/auth/me round-trip works. (4) /api/auth/profile validates picture scheme (data:image/|http(s)://) and size ~3MB cap. (5) Admin login works without needing re-seed."
+}
